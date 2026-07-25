@@ -3,6 +3,7 @@ import { useData } from '../context/DataContext';
 import {
   EyeOff, ShieldCheck, CheckCircle2, XCircle, Lock, Briefcase,
   AlertTriangle, Award, BarChart2, Upload, Loader2, ScanLine,
+  FileText, Calendar, ChevronRight,
 } from 'lucide-react';
 import {
   structureRawOcrText,
@@ -329,17 +330,95 @@ export default function BlindResumeScreening() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-white)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-light)' }}>
           <Briefcase size={14} color="var(--primary-indigo)" />
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Candidate:</span>
-          <select
-            value={cid}
-            onChange={e => { setSelectedId(e.target.value); setUploadState('idle'); setUploadError(''); }}
-            style={{ border: 'none', background: 'transparent', fontWeight: 600, color: 'var(--primary-indigo)', cursor: 'pointer', outline: 'none' }}
-          >
-            {candidates.map(c => (
-              <option key={c.id} value={c.id}>{c.id} — {c.appliedRole} ({c.status})</option>
-            ))}
-          </select>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+            {candidates.length} Application{candidates.length === 1 ? '' : 's'}
+          </span>
         </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FileText size={18} color="var(--primary-indigo)" />
+            <div>
+              <h3 className="card-title">Candidate Applications</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                Click a row to open it below and make screening changes
+              </p>
+            </div>
+          </div>
+          <span className="badge badge-indigo">{candidates.length} Applications</span>
+        </div>
+
+        {candidates.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <FileText size={36} style={{ opacity: 0.25, marginBottom: '0.75rem' }} />
+            <p>No candidate applications yet.</p>
+          </div>
+        ) : (
+          <div className="data-table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Applied Role</th>
+                  <th>Skills</th>
+                  <th>Merit Score</th>
+                  <th>Applied Date</th>
+                  <th>Status</th>
+                  <th>Open</th>
+                </tr>
+              </thead>
+              <tbody>
+                {candidates.map(cand => {
+                  const isSelected = cand.id === cid;
+                  const merit = getCandidateMeritScore(cand);
+                  return (
+                    <tr
+                      key={cand.id}
+                      onClick={() => { setSelectedId(cand.id); setUploadState('idle'); setUploadError(''); }}
+                      style={{
+                        cursor: 'pointer',
+                        background: isSelected ? 'rgba(99,102,241,0.07)' : 'transparent',
+                      }}
+                    >
+                      <td className="font-mono" style={{ fontWeight: 700, color: 'var(--primary-indigo)' }}>{cand.id}</td>
+                      <td><strong>{cand.appliedRole}</strong></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', maxWidth: '220px' }}>
+                          {(cand.skills || []).slice(0, 3).map(s => (
+                            <span key={s} className="badge badge-indigo" style={{ fontSize: '0.65rem' }}>{s}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${merit >= 80 ? 'badge-teal' : merit >= 60 ? 'badge-amber' : 'badge-coral'}`}>
+                          {merit}/100
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                          <Calendar size={13} />
+                          {formatApplicationDate(cand.appliedDate || cand.createdAt)}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${cand.status === 'Shortlisted' ? 'badge-teal' : cand.status === 'Declined' ? 'badge-coral' : 'badge-amber'}`}>
+                          {cand.status || 'Pending Review'}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', color: 'var(--primary-indigo)', fontWeight: 600 }}>
+                          View <ChevronRight size={14} />
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* ── Split layout ── */}
@@ -515,17 +594,6 @@ export default function BlindResumeScreening() {
               </select>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Evaluator Notes (PII-Free)</label>
-              <textarea
-                className="form-textarea"
-                rows="3"
-                placeholder="Objective assessment based solely on extracted skills and experience…"
-                value={a.notes}
-                onChange={e => setA(cid, 'notes', e.target.value)}
-              />
-            </div>
-
             <div style={{ marginTop: '0.75rem', padding: '0.5rem 0.75rem', background: 'rgba(99,102,241,0.07)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>Composite Recruiter Score</span>
               <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-indigo)' }}>{compositeScore}%</span>
@@ -573,4 +641,15 @@ export default function BlindResumeScreening() {
       `}</style>
     </div>
   );
+}
+
+function formatApplicationDate(value) {
+  if (!value) return 'Not recorded';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return new Intl.DateTimeFormat('en', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(parsed);
 }
