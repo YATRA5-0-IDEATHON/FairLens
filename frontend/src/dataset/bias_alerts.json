@@ -18,15 +18,5 @@
     "description": "Unexplained base compensation variance detected for mid-tier Sales hires after controlling for target attainment.",
     "actionUrl": "/pay-equity",
     "status": "Active"
-  },
-  {
-    "id": "ALERT-03",
-    "title": "Performance Review Sentiment Skew",
-    "department": "Product & Design",
-    "severity": "Low",
-    "metric": "3.2x Demeanor Flags",
-    "description": "Subjective terms like 'assertive' vs 'aggressive' flagged in 12 annual performance reviews.",
-    "actionUrl": "/performance-analysis",
-    "status": "Active"
   }
 ]

@@ -16,7 +16,6 @@ import BlindResumeScreening from './pages/BlindResumeScreening';
 import CandidateComparison from './pages/CandidateComparison';
 import GenderAnalyticsDashboard from './pages/GenderAnalyticsDashboard';
 import PayEquityAudit from './pages/PayEquityAudit';
-import PerformanceReviewAnalysis from './pages/PerformanceReviewAnalysis';
 import PromotionAnalytics from './pages/PromotionAnalytics';
 import HarassmentReportingDashboard from './pages/HarassmentReportingDashboard';
 import EmployeeReportingPortal from './pages/EmployeeReportingPortal';
@@ -69,7 +68,6 @@ export default function App() {
           <Route path="/candidate-comparison" element={<LayoutWrapper><CandidateComparison /></LayoutWrapper>} />
           <Route path="/gender-analytics" element={<LayoutWrapper><GenderAnalyticsDashboard /></LayoutWrapper>} />
           <Route path="/pay-equity" element={<LayoutWrapper><PayEquityAudit /></LayoutWrapper>} />
-          <Route path="/performance-analysis" element={<LayoutWrapper><PerformanceReviewAnalysis /></LayoutWrapper>} />
           <Route path="/promotion-analytics" element={<LayoutWrapper><PromotionAnalytics /></LayoutWrapper>} />
           <Route path="/harassment-dashboard" element={<LayoutWrapper><HarassmentReportingDashboard /></LayoutWrapper>} />
           <Route path="/compliance-reports" element={<LayoutWrapper><ComplianceReports /></LayoutWrapper>} />
