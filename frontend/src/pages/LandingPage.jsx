@@ -1,13 +1,5 @@
-<<<<<<< HEAD
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Lock, Briefcase, Building2, ChevronRight } from 'lucide-react';
-=======
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import EqualityScoreRing from '../components/EqualityScoreRing';
-import { ShieldCheck, EyeOff, BarChart2, Award, Lock, ArrowRight, CheckCircle2, ChevronRight, Briefcase, Building2 } from 'lucide-react';
->>>>>>> 849303e (Resume scanner)
 
 export default function LandingPage() {
   const navigate = useNavigate();

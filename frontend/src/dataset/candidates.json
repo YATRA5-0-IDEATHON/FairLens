@@ -1,0 +1,71 @@
+[
+  {
+    "id": "CAN-891",
+    "name": "Sarah Jenkins",
+    "email": "s.jenkins@domain.com",
+    "phone": "+1 (555) 019-2834",
+    "location": "San Francisco, CA",
+    "appliedRole": "Senior Staff Engineer",
+    "appliedDate": "2026-07-25",
+    "gender": "Female",
+    "summary": "Senior Full-Stack Software Engineer with 6+ years experience architecting distributed cloud backend services and micro-frontend web applications. Proven track record scaling API throughput from 10k to 250k req/min using Node.js and PostgreSQL.",
+    "skills": ["Distributed Systems", "Node.js", "React", "PostgreSQL", "System Parity"],
+    "experience": [
+      {
+        "title": "Staff Software Engineer",
+        "company": "Tier-1 SaaS Enterprise",
+        "period": "2022 – Present",
+        "highlights": [
+          "Led cross-functional engineering pod of 8 developers in migrating legacy monolith to AWS ECS microservices.",
+          "Reduced P99 API latency by 42% by implementing Redis caching layers and GraphQL query batching."
+        ]
+      },
+      {
+        "title": "Full Stack Developer",
+        "company": "FinTech Unicorn",
+        "period": "2019 – 2022",
+        "highlights": [
+          "Built real-time transaction monitoring dashboards serving 40k daily active users.",
+          "Implemented automated CI/CD pipeline achieving 99.98% deployment uptime."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "B.S. in Computer Science",
+      "school": "Stanford University",
+      "gradYear": "2019"
+    },
+    "meritScore": 94,
+    "status": "Pending Review"
+  },
+  {
+    "id": "CAN-902",
+    "name": "Michael Chang",
+    "email": "m.chang@domain.com",
+    "phone": "+1 (555) 432-8765",
+    "location": "Seattle, WA",
+    "appliedRole": "Lead Product Manager",
+    "appliedDate": "2026-07-25",
+    "gender": "Male",
+    "summary": "Product Leader with 7 years experience scaling SaaS products from $2M to $15M ARR. Expert in user-centric roadmap prioritization, A/B experimentation, and cross-functional team leadership.",
+    "skills": ["Product Strategy", "SaaS Growth", "User Research", "Agile & Scrum", "SQL & Analytics"],
+    "experience": [
+      {
+        "title": "Senior Product Manager",
+        "company": "Cloud Data Platform",
+        "period": "2021 – Present",
+        "highlights": [
+          "Managed enterprise data pipeline product line generating $8M annual recurring revenue.",
+          "Increased product adoption by 35% through streamlined onboarding flows."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "M.S. in Management & Technology",
+      "school": "University of Washington",
+      "gradYear": "2018"
+    },
+    "meritScore": 91,
+    "status": "Pending Review"
+  }
+]

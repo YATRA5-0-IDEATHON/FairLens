@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-<<<<<<< HEAD
-import { Lock, Shield, ArrowRight, UserCheck, Building2, Key, CheckCircle, AlertCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-=======
 import { Lock, Shield, ArrowRight, UserCheck, Building2, CheckCircle, AlertCircle } from 'lucide-react';
->>>>>>> 849303e (Resume scanner)
+import { useAuth } from '../context/AuthContext';
 
 // Mock Company Code Database for Authentication
 const MOCK_COMPANY_DATABASE = [
