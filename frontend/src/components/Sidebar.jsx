@@ -5,7 +5,6 @@ import {
   Users, 
   BarChart3, 
   DollarSign, 
-  FileCheck2, 
   TrendingUp, 
   ShieldAlert, 
   Lock, 
@@ -50,10 +49,6 @@ export default function Sidebar() {
         <NavLink to="/pay-equity" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <DollarSign size={18} />
           <span>Pay Equity Audit</span>
-        </NavLink>
-        <NavLink to="/performance-analysis" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <FileCheck2 size={18} />
-          <span>Performance Reviews</span>
         </NavLink>
         <NavLink to="/promotion-analytics" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <TrendingUp size={18} />
