@@ -1,4 +1,15 @@
+// Redacts PII and gender-identifying language from resume text so HR reviewers
+// see skills/experience without demographic bias signals.
+
 const COMMON_GENDER_TERMS = [
+  // Pronoun+verb pairs first, so "he is" -> "they are" instead of the
+  // grammatically-off "they is". These must run before the lone-pronoun
+  // pattern below, since replacement happens on the running mutated text.
+  { pattern: /\b(he|she)'s\b/gi, replacement: "they're" },
+  { pattern: /\b(he|she)\s+is\b/gi, replacement: 'they are' },
+  { pattern: /\b(he|she)\s+was\b/gi, replacement: 'they were' },
+  { pattern: /\b(he|she)\s+has\b/gi, replacement: 'they have' },
+  { pattern: /\b(he|she)\s+does\b/gi, replacement: 'they do' },
   { pattern: /\b(he|she)\b/gi, replacement: 'they' },
   { pattern: /\b(him|her)\b/gi, replacement: 'them' },
   { pattern: /\b(his|hers)\b/gi, replacement: 'their' },
@@ -14,7 +25,7 @@ const SKILL_KEYWORDS = [
   'Data Analysis', 'Agile', 'Scrum', 'Figma', 'UI/UX'
 ];
 
-function anonymizeResume(rawText) {
+export function anonymizeResume(rawText) {
   if (!rawText || typeof rawText !== 'string') {
     return {
       anonymizedText: '',
@@ -62,11 +73,15 @@ function anonymizeResume(rawText) {
 
   return {
     anonymizedText: text,
-    redactedCount: totalRedactions || 4,
+    redactedCount: totalRedactions,
     redactedDetails,
     extractedSkills,
-    yearsOfExperience: 4
+    yearsOfExperience: estimateYearsOfExperience(rawText)
   };
 }
 
-module.exports = { anonymizeResume };
+// Looks for patterns like "6 years", "6+ years of experience"
+function estimateYearsOfExperience(rawText) {
+  const match = rawText.match(/(\d+)\+?\s*years?/i);
+  return match ? parseInt(match[1], 10) : 0;
+}

@@ -66,6 +66,348 @@
       "gradYear": "2018"
     },
     "meritScore": 91,
+    "status": "Shortlisted"
+  },
+  {
+    "id": "CAN-903",
+    "name": "Aisha Patel",
+    "email": "a.patel@domain.com",
+    "phone": "+1 (555) 871-4532",
+    "location": "Austin, TX",
+    "appliedRole": "Senior Data Scientist",
+    "appliedDate": "2026-07-24",
+    "gender": "Female",
+    "summary": "Data scientist with 5 years experience building ML pipelines and predictive models for fintech and e-commerce. Published 3 papers on fairness in AI at NeurIPS and ICML.",
+    "skills": ["Machine Learning", "Python", "TensorFlow", "PySpark", "Statistical Modeling", "Fairness in AI"],
+    "experience": [
+      {
+        "title": "Data Scientist II",
+        "company": "FinTech Solutions Inc.",
+        "period": "2023 – Present",
+        "highlights": [
+          "Built credit-risk ML model reducing default prediction error by 28% while ensuring demographic parity.",
+          "Developed bias audit toolkit now used across 4 product teams for model fairness validation."
+        ]
+      },
+      {
+        "title": "Junior Data Scientist",
+        "company": "E-Commerce Platform Co.",
+        "period": "2021 – 2023",
+        "highlights": [
+          "Designed recommendation engine improving click-through rate by 34%.",
+          "Implemented A/B testing framework adopted by entire data science org."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "M.S. in Statistics",
+      "school": "MIT",
+      "gradYear": "2021"
+    },
+    "meritScore": 96,
     "status": "Pending Review"
+  },
+  {
+    "id": "CAN-904",
+    "name": "Marcus Johnson",
+    "email": "m.johnson@domain.com",
+    "phone": "+1 (555) 345-7890",
+    "location": "Chicago, IL",
+    "appliedRole": "VP of Engineering",
+    "appliedDate": "2026-07-23",
+    "gender": "Male",
+    "summary": "Engineering leader with 12+ years managing teams of 30+ engineers. Previously led platform engineering at two unicorn startups through hypergrowth phases.",
+    "skills": ["Engineering Leadership", "Platform Architecture", "Team Building", "Kubernetes", "Cloud Infrastructure", "Strategic Planning"],
+    "experience": [
+      {
+        "title": "Director of Engineering",
+        "company": "ScaleUp Tech",
+        "period": "2021 – Present",
+        "highlights": [
+          "Scaled engineering org from 12 to 45 engineers across 5 squads.",
+          "Reduced infrastructure costs by 40% through cloud optimization initiative."
+        ]
+      },
+      {
+        "title": "Senior Engineering Manager",
+        "company": "Enterprise SaaS Co.",
+        "period": "2018 – 2021",
+        "highlights": [
+          "Led migration of 200+ microservices to service mesh architecture.",
+          "Established DEI hiring pipeline increasing underrepresented candidate flow by 60%."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "B.S. in Computer Engineering",
+      "school": "Georgia Tech",
+      "gradYear": "2014"
+    },
+    "meritScore": 89,
+    "status": "Pending Review"
+  },
+  {
+    "id": "CAN-905",
+    "name": "Emily Torres",
+    "email": "e.torres@domain.com",
+    "phone": "+1 (555) 678-2341",
+    "location": "New York, NY",
+    "appliedRole": "Director of Marketing",
+    "appliedDate": "2026-07-22",
+    "gender": "Female",
+    "summary": "Marketing executive with 8 years driving brand strategy and demand generation for B2B SaaS companies. Grew pipeline from $5M to $25M ARR at previous role.",
+    "skills": ["Demand Generation", "Brand Strategy", "Content Marketing", "Marketing Analytics", "Team Leadership"],
+    "experience": [
+      {
+        "title": "Senior Marketing Manager",
+        "company": "B2B SaaS Leader",
+        "period": "2022 – Present",
+        "highlights": [
+          "Built ABM program generating $8M in influenced pipeline within first year.",
+          "Led rebranding initiative resulting in 45% increase in brand recall."
+        ]
+      },
+      {
+        "title": "Marketing Manager",
+        "company": "GrowthStage Analytics",
+        "period": "2019 – 2022",
+        "highlights": [
+          "Scaled content marketing program from 10k to 250k monthly visitors.",
+          "Reduced CAC by 32% through targeted paid campaigns."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "M.B.A.",
+      "school": "NYU Stern School of Business",
+      "gradYear": "2019"
+    },
+    "meritScore": 93,
+    "status": "Shortlisted"
+  },
+  {
+    "id": "CAN-906",
+    "name": "David Okonkwo",
+    "email": "d.okonkwo@domain.com",
+    "phone": "+1 (555) 987-6543",
+    "location": "Toronto, ON",
+    "appliedRole": "Senior DevOps Engineer",
+    "appliedDate": "2026-07-21",
+    "gender": "Male",
+    "summary": "DevOps engineer with 6 years experience designing and managing cloud infrastructure serving 10M+ users. Certified AWS Solutions Architect with deep Kubernetes expertise.",
+    "skills": ["AWS", "Kubernetes", "Terraform", "CI/CD", "Docker", "Monitoring"],
+    "experience": [
+      {
+        "title": "DevOps Engineer",
+        "company": "Global Tech Platform",
+        "period": "2021 – Present",
+        "highlights": [
+          "Designed multi-region Kubernetes cluster serving 99.99% uptime for critical workloads.",
+          "Reduced deployment time from 45 minutes to 4 minutes with GitOps pipeline."
+        ]
+      },
+      {
+        "title": "Cloud Engineer",
+        "company": "StartupXYZ",
+        "period": "2019 – 2021",
+        "highlights": [
+          "Migrated entire on-prem infrastructure to AWS saving $200k/yr.",
+          "Implemented auto-scaling policies reducing over-provisioning by 55%."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "B.S. in Computer Science",
+      "school": "University of Waterloo",
+      "gradYear": "2019"
+    },
+    "meritScore": 90,
+    "status": "Pending Review"
+  },
+  {
+    "id": "CAN-907",
+    "name": "Lena Schmidt",
+    "email": "l.schmidt@domain.com",
+    "phone": "+1 (555) 111-2233",
+    "location": "Denver, CO",
+    "appliedRole": "Staff UX Designer",
+    "appliedDate": "2026-07-20",
+    "gender": "Female",
+    "summary": "UX designer with 7 years creating accessible, human-centered designs for enterprise and consumer products. Advocate for inclusive design practices.",
+    "skills": ["UX Design", "Design Systems", "User Research", "Figma", "Prototyping", "Accessibility"],
+    "experience": [
+      {
+        "title": "Senior UX Designer",
+        "company": "Design-First Tech",
+        "period": "2022 – Present",
+        "highlights": [
+          "Created company-wide design system adopted by 12 product teams.",
+          "Improved accessibility score from 72 to 96 through systematic audit and redesign."
+        ]
+      },
+      {
+        "title": "UX Designer",
+        "company": "Consumer App Studio",
+        "period": "2019 – 2022",
+        "highlights": [
+          "Redesigned onboarding flow increasing user retention by 28%.",
+          "Conducted 50+ user research sessions driving product roadmap priorities."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "B.A. in Interaction Design",
+      "school": "California College of the Arts",
+      "gradYear": "2018"
+    },
+    "meritScore": 95,
+    "status": "Pending Review"
+  },
+  {
+    "id": "CAN-908",
+    "name": "Raj Mehta",
+    "email": "r.mehta@domain.com",
+    "phone": "+1 (555) 444-5566",
+    "location": "San Jose, CA",
+    "appliedRole": "Senior Backend Engineer",
+    "appliedDate": "2026-07-19",
+    "gender": "Male",
+    "summary": "Backend engineer specializing in high-throughput distributed systems. 5 years experience with Go, Rust, and PostgreSQL at internet-scale companies.",
+    "skills": ["Go", "Rust", "PostgreSQL", "Redis", "gRPC", "Kafka"],
+    "experience": [
+      {
+        "title": "Backend Engineer II",
+        "company": "Large-Scale Data Corp",
+        "period": "2022 – Present",
+        "highlights": [
+          "Designed event-sourcing system processing 500k events/second with Kafka.",
+          "Optimized critical query path reducing P99 latency by 65%."
+        ]
+      },
+      {
+        "title": "Software Engineer",
+        "company": "Fast-Growth Startup",
+        "period": "2020 – 2022",
+        "highlights": [
+          "Built real-time analytics pipeline serving dashboards with sub-second refresh.",
+          "Contributed to open-source Go libraries with 2k+ GitHub stars."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "B.S. in Computer Science",
+      "school": "UC Berkeley",
+      "gradYear": "2020"
+    },
+    "meritScore": 92,
+    "status": "Shortlisted"
+  },
+  {
+    "id": "CAN-909",
+    "name": "Camila Rojas",
+    "email": "c.rojas@domain.com",
+    "phone": "+1 (555) 777-8899",
+    "location": "Los Angeles, CA",
+    "appliedRole": "HR Business Partner",
+    "appliedDate": "2026-07-18",
+    "gender": "Female",
+    "summary": "Strategic HR partner with 6 years experience scaling people operations and DEI programs from 100 to 2000+ employees at high-growth tech companies.",
+    "skills": ["Employee Relations", "DEI Strategy", "Performance Management", "Change Management", "HR Analytics"],
+    "experience": [
+      {
+        "title": "Senior HR Business Partner",
+        "company": "HyperGrowth Tech",
+        "period": "2023 – Present",
+        "highlights": [
+          "Partnered with engineering leadership to design equitable promotion framework.",
+          "Reduced time-to-hire by 30% through streamlined interview process."
+        ]
+      },
+      {
+        "title": "HR Generalist",
+        "company": "Mid-Size SaaS",
+        "period": "2020 – 2023",
+        "highlights": [
+          "Implemented DEI dashboard tracking representation metrics across all departments.",
+          "Launched mentorship program for under-represented talent with 90% satisfaction rate."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "M.S. in Industrial-Organizational Psychology",
+      "school": "University of Southern California",
+      "gradYear": "2020"
+    },
+    "meritScore": 88,
+    "status": "Pending Review"
+  },
+  {
+    "id": "CAN-910",
+    "name": "Thomas Weber",
+    "email": "t.weber@domain.com",
+    "phone": "+1 (555) 222-3344",
+    "location": "Portland, OR",
+    "appliedRole": "Senior Backend Engineer",
+    "appliedDate": "2026-07-17",
+    "gender": "Male",
+    "summary": "Backend engineer with 4 years experience in Java, Spring Boot, and microservices architecture.",
+    "skills": ["Java", "Spring Boot", "Microservices", "PostgreSQL", "Docker"],
+    "experience": [
+      {
+        "title": "Backend Developer",
+        "company": "Logistics Tech Co.",
+        "period": "2022 – Present",
+        "highlights": [
+          "Built order processing service handling 100k transactions/day.",
+          "Implemented caching layer reducing API response times by 60%."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "B.S. in Software Engineering",
+      "school": "Oregon State University",
+      "gradYear": "2021"
+    },
+    "meritScore": 76,
+    "status": "Declined"
+  },
+  {
+    "id": "CAN-911",
+    "name": "Nina Voskov",
+    "email": "n.voskov@domain.com",
+    "phone": "+1 (555) 888-9900",
+    "location": "Boston, MA",
+    "appliedRole": "Senior Data Analyst",
+    "appliedDate": "2026-07-16",
+    "gender": "Female",
+    "summary": "Data analyst with 5 years experience turning complex datasets into actionable business insights. Expert in SQL, Python, and Tableau.",
+    "skills": ["SQL", "Python", "Tableau", "Data Visualization", "Statistical Analysis"],
+    "experience": [
+      {
+        "title": "Data Analyst II",
+        "company": "HealthTech Analytics",
+        "period": "2023 – Present",
+        "highlights": [
+          "Built automated reporting dashboards adopted by 5 departments.",
+          "Reduced reporting turnaround time from 2 days to 2 hours."
+        ]
+      },
+      {
+        "title": "Junior Data Analyst",
+        "company": "Retail Insights Inc.",
+        "period": "2021 – 2023",
+        "highlights": [
+          "Analyzed customer churn data leading to 15% retention improvement.",
+          "Created KPI tracking system used by executive leadership."
+        ]
+      }
+    ],
+    "education": {
+      "degree": "B.S. in Statistics",
+      "school": "Northeastern University",
+      "gradYear": "2021"
+    },
+    "meritScore": 87,
+    "status": "Hired"
   }
 ]

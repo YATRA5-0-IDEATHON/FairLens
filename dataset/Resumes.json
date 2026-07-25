@@ -1,0 +1,28 @@
+[
+    {
+        "_id": "CAND-1784989017294",
+        "candidateCode": "CAND-7540",
+        "jobTitle": "Data Analyst",
+        "anonymizedText": "they has 4 years experience in Python and SQL. Email: [REDACTED EMAIL]",
+        "redactedCount": 2,
+        "redactedDetails": [
+            {
+                "type": "Email",
+                "count": 1
+            },
+            {
+                "type": "Gender/Pronoun",
+                "count": 1
+            }
+        ],
+        "extractedSkills": [
+            "Python",
+            "SQL"
+        ],
+        "yearsOfExperience": 4,
+        "rating": 0,
+        "evaluationNotes": "",
+        "status": "New",
+        "createdAt": "2026-07-25T14:16:57.294Z"
+    }
+]
