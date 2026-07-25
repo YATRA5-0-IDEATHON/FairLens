@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { DataProvider } from './context/DataContext';
 
 // Import Shared Components
 import Sidebar from './components/Sidebar';
@@ -37,31 +38,33 @@ function LayoutWrapper({ children }) {
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Public Landing, Login & Hiring Application */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/apply" element={<CandidateHiring />} />
+    <DataProvider>
+      <Router>
+        <Routes>
+          {/* Public Landing, Login & Hiring Application */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/apply" element={<CandidateHiring />} />
 
-        {/* Anonymous Employee Portal (Standalone without HR Sidebar) */}
-        <Route path="/employee-portal" element={<EmployeeReportingPortal />} />
+          {/* Anonymous Employee Portal (Standalone without HR Sidebar) */}
+          <Route path="/employee-portal" element={<EmployeeReportingPortal />} />
 
-        {/* HR & Leadership Platform Routes */}
-        <Route path="/dashboard" element={<LayoutWrapper><HRDashboard /></LayoutWrapper>} />
-        <Route path="/blind-screening" element={<LayoutWrapper><BlindResumeScreening /></LayoutWrapper>} />
-        <Route path="/candidate-comparison" element={<LayoutWrapper><CandidateComparison /></LayoutWrapper>} />
-        <Route path="/gender-analytics" element={<LayoutWrapper><GenderAnalyticsDashboard /></LayoutWrapper>} />
-        <Route path="/pay-equity" element={<LayoutWrapper><PayEquityAudit /></LayoutWrapper>} />
-        <Route path="/performance-analysis" element={<LayoutWrapper><PerformanceReviewAnalysis /></LayoutWrapper>} />
-        <Route path="/promotion-analytics" element={<LayoutWrapper><PromotionAnalytics /></LayoutWrapper>} />
-        <Route path="/harassment-dashboard" element={<LayoutWrapper><HarassmentReportingDashboard /></LayoutWrapper>} />
-        <Route path="/compliance-reports" element={<LayoutWrapper><ComplianceReports /></LayoutWrapper>} />
-        <Route path="/settings" element={<LayoutWrapper><Settings /></LayoutWrapper>} />
+          {/* HR & Leadership Platform Routes */}
+          <Route path="/dashboard" element={<LayoutWrapper><HRDashboard /></LayoutWrapper>} />
+          <Route path="/blind-screening" element={<LayoutWrapper><BlindResumeScreening /></LayoutWrapper>} />
+          <Route path="/candidate-comparison" element={<LayoutWrapper><CandidateComparison /></LayoutWrapper>} />
+          <Route path="/gender-analytics" element={<LayoutWrapper><GenderAnalyticsDashboard /></LayoutWrapper>} />
+          <Route path="/pay-equity" element={<LayoutWrapper><PayEquityAudit /></LayoutWrapper>} />
+          <Route path="/performance-analysis" element={<LayoutWrapper><PerformanceReviewAnalysis /></LayoutWrapper>} />
+          <Route path="/promotion-analytics" element={<LayoutWrapper><PromotionAnalytics /></LayoutWrapper>} />
+          <Route path="/harassment-dashboard" element={<LayoutWrapper><HarassmentReportingDashboard /></LayoutWrapper>} />
+          <Route path="/compliance-reports" element={<LayoutWrapper><ComplianceReports /></LayoutWrapper>} />
+          <Route path="/settings" element={<LayoutWrapper><Settings /></LayoutWrapper>} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </DataProvider>
   );
 }
