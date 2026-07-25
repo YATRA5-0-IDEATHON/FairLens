@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 
 // Import Shared Components
 import Sidebar from './components/Sidebar';
@@ -24,6 +25,7 @@ import ComplianceReports from './pages/ComplianceReports';
 
 function LayoutWrapper({ children }) {
   return (
+    <ProtectedRoute requiredRole="hr">
     <div className="app-container">
       <Sidebar />
       <div className="main-wrapper">
@@ -33,7 +35,16 @@ function LayoutWrapper({ children }) {
         </main>
       </div>
     </div>
+    </ProtectedRoute>
   );
+}
+
+function PublicEntry({ children }) {
+  const { auth } = useAuth();
+  if (auth.isAuthenticated) {
+    return <Navigate to={auth.role === 'hr' ? '/dashboard' : '/employee-dashboard'} replace />;
+  }
+  return children;
 }
 
 export default function App() {
@@ -43,8 +54,8 @@ export default function App() {
       <Router>
         <Routes>
           {/* Public Landing, Login & Hiring Application */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<PublicEntry><LandingPage /></PublicEntry>} />
+          <Route path="/login" element={<PublicEntry><Login /></PublicEntry>} />
           <Route path="/apply" element={<CandidateHiring />} />
 
           {/* Employee Dashboard — first page after employee login */}

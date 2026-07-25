@@ -4,9 +4,12 @@ import { useAuth } from '../context/AuthContext';
 export default function ProtectedRoute({ children, requiredRole }) {
   const { auth } = useAuth();
 
+  if (auth.isChecking) {
+    return <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--text-muted)' }}>Verifying secure session…</div>;
+  }
+
   if (!auth.isAuthenticated) {
-    // Redirect to login with the employee tab active
-    return <Navigate to="/login?role=employee" replace />;
+    return <Navigate to={`/login?role=${requiredRole === 'employee' ? 'employee' : 'hr'}`} replace />;
   }
 
   if (requiredRole && auth.role !== requiredRole) {
@@ -14,7 +17,7 @@ export default function ProtectedRoute({ children, requiredRole }) {
     if (auth.role === 'hr') {
       return <Navigate to="/dashboard" replace />;
     }
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/employee-dashboard" replace />;
   }
 
   return children;

@@ -1,243 +1,98 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Lock, Shield, ArrowRight, UserCheck, Building2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { AlertCircle, ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Lock, ShieldCheck, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-// Mock Company Code Database for Authentication
-const MOCK_COMPANY_DATABASE = [
-  { code: 'COMP-101', name: 'Acme Global Corp', password: 'admin123', plan: 'Enterprise Pro' },
-  { code: 'COMP-777', name: 'FairLens Tech Inc', password: 'fairlens2026', plan: 'DEI Leader Suite' },
-  { code: 'EQUI-999', name: 'Nexus Innovations', password: 'equi2026', plan: 'Standard Org' }
-];
+const demoAccounts = {
+  hr: { email: 'hr@fairlens.demo', password: 'FairLens@2026', label: 'HR administrator' },
+  employee: { email: 'employee@fairlens.demo', password: 'Employee@2026', label: 'Employee' },
+};
 
 export default function Login() {
   const [searchParams] = useSearchParams();
   const initialRole = searchParams.get('role') === 'employee' ? 'employee' : 'hr';
-  
-  const [activeTab, setActiveTab] = useState(initialRole);
-  
-  // HR Form Inputs
-  const [companyCode, setCompanyCode] = useState('COMP-101');
-  const [password, setPassword] = useState('admin123');
-  
-  // Employee Form Inputs
-  const [employeeId, setEmployeeId] = useState('EMP-4092');
-
-  const [authError, setAuthError] = useState('');
-  const [authSuccess, setAuthSuccess] = useState('');
-
+  const [role, setRole] = useState(initialRole);
+  const [email, setEmail] = useState(demoAccounts[initialRole].email);
+  const [password, setPassword] = useState(demoAccounts[initialRole].password);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleHRLogin = (e) => {
-    e.preventDefault();
-    setAuthError('');
-    setAuthSuccess('');
+  const changeRole = nextRole => {
+    setRole(nextRole);
+    setEmail(demoAccounts[nextRole].email);
+    setPassword(demoAccounts[nextRole].password);
+    setError('');
+  };
 
-    // Check against Company Database
-    const matchedCompany = MOCK_COMPANY_DATABASE.find(
-      (c) => c.code.toUpperCase() === companyCode.trim().toUpperCase() && c.password === password
-    );
-
-    if (matchedCompany) {
-      setAuthSuccess(`Authenticated successfully for ${matchedCompany.name} (${matchedCompany.code})!`);
-      login({ role: 'hr', companyName: matchedCompany.name, companyCode: matchedCompany.code });
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 800);
-    } else {
-      setAuthError('Invalid Company Code or Password. Try preset COMP-101 / admin123');
+  const handleSubmit = async event => {
+    event.preventDefault();
+    setError('');
+    setSubmitting(true);
+    try {
+      const session = await login({ email: email.trim(), password, role });
+      navigate(session.role === 'hr' ? '/dashboard' : '/employee-dashboard', { replace: true });
+    } catch (err) {
+      setError(err.message === 'Failed to fetch'
+        ? 'Authentication server is unavailable. Start the backend and try again.'
+        : err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleEmployeeLogin = (e) => {
-    e.preventDefault();
-    setAuthSuccess('Anonymous Access Granted');
-    login({ role: 'employee', employeeId: employeeId || null });
-    setTimeout(() => {
-      navigate('/employee-dashboard');
-    }, 600);
-  };
-
-  const fillQuickPreset = (preset) => {
-    setCompanyCode(preset.code);
-    setPassword(preset.password);
-    setAuthError('');
-  };
-
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--neutral-bg)', padding: '2rem' }}>
-      <div style={{ width: '100%', maxWidth: '480px' }}>
-        
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <div style={{ width: '48px', height: '48px', background: 'linear-gradient(135deg, #3FA796, #E85D4E)', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-serif)', fontSize: '1.6rem', color: '#FFF', marginBottom: '0.75rem' }}>
-              FL
-            </div>
-          </Link>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--primary-indigo)' }}>FairLens Access Portal</h1>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>AI-Powered Gender Equality & Workplace Safety Architecture</p>
+    <main className="login-page">
+      <section className="login-story">
+        <Link className="login-brand" to="/"><b>FL</b><span>FairLens</span></Link>
+        <div>
+          <span className="login-eyebrow"><ShieldCheck size={15} /> Secure organization access</span>
+          <h1>Fair decisions begin with trusted access.</h1>
+          <p>Sign in with a verified prototype account. Your role determines which employee or HR workspace you can access.</p>
+          <div className="security-points">
+            <span><CheckCircle2 size={16} /> Server-validated credentials</span>
+            <span><CheckCircle2 size={16} /> Signed, role-based session token</span>
+            <span><CheckCircle2 size={16} /> Protected HR routes and actions</span>
+          </div>
         </div>
+        <small>Prototype authentication · Credentials are stored in the backend JSON user registry.</small>
+      </section>
 
-        {/* Auth Card */}
-        <div className="card" style={{ boxShadow: 'var(--shadow-lg)' }}>
-          
-          {/* Role Switcher */}
-          <div className="tab-switcher" style={{ marginBottom: '1.5rem' }}>
-            <button 
-              className={`tab-btn ${activeTab === 'hr' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('hr'); setAuthError(''); setAuthSuccess(''); }}
-            >
-              <Building2 size={15} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-              HR & Org Login
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'employee' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('employee'); setAuthError(''); setAuthSuccess(''); }}
-            >
-              <Lock size={15} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-              Employee Portal
-            </button>
+      <section className="login-area">
+        <div className="login-card">
+          <div className="login-heading">
+            <span>Welcome back</span><h2>Sign in to FairLens</h2><p>Choose your account type and enter its credentials.</p>
           </div>
 
-          {authError && (
-            <div style={{ background: 'var(--accent-coral-light)', border: '1px solid var(--accent-coral)', color: 'var(--accent-coral)', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertCircle size={16} />
-              <span>{authError}</span>
-            </div>
-          )}
+          <div className="role-switch">
+            <button type="button" className={role === 'hr' ? 'active' : ''} onClick={() => changeRole('hr')}><Building2 size={17} /> HR account</button>
+            <button type="button" className={role === 'employee' ? 'active' : ''} onClick={() => changeRole('employee')}><UserRound size={17} /> Employee</button>
+          </div>
 
-          {authSuccess && (
-            <div style={{ background: 'var(--secondary-teal-light)', border: '1px solid var(--secondary-teal)', color: 'var(--secondary-teal)', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckCircle size={16} />
-              <span>{authSuccess}</span>
-            </div>
-          )}
+          {error && <div className="login-error"><AlertCircle size={16} /><span>{error}</span></div>}
 
-          {/* HR Login Form */}
-          {activeTab === 'hr' ? (
-            <form onSubmit={handleHRLogin}>
-              <div className="form-group">
-                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Company Code / Org Identifier</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--secondary-teal)', fontWeight: 400 }}>Format: COMP-XXX</span>
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={companyCode}
-                    onChange={(e) => setCompanyCode(e.target.value)}
-                    placeholder="e.g. COMP-101"
-                    required
-                    style={{ textTransform: 'uppercase', fontFamily: 'var(--font-mono)', fontWeight: 600 }}
-                  />
-                </div>
-              </div>
+          <form onSubmit={handleSubmit}>
+            <label><span>Email address</span><div><UserRound size={17} /><input type="email" value={email} onChange={event => setEmail(event.target.value)} autoComplete="username" required /></div></label>
+            <label><span>Password</span><div><Lock size={17} /><input type={showPassword ? 'text' : 'password'} value={password} onChange={event => setPassword(event.target.value)} autoComplete="current-password" required /><button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>
+            <button className="login-submit" type="submit" disabled={submitting}><span>{submitting ? 'Verifying account…' : `Sign in as ${role === 'hr' ? 'HR' : 'employee'}`}</span><ArrowRight size={17} /></button>
+          </form>
 
-              <div className="form-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label className="form-label">Company Account Password</label>
-                  <a href="#forgot" style={{ fontSize: '0.75rem', color: 'var(--secondary-teal)', textDecoration: 'none' }}>Forgot pass?</a>
-                </div>
-                <input 
-                  type="password" 
-                  className="form-input" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password..."
-                  required
-                />
-              </div>
+          <div className="demo-credential">
+            <div><span>Prototype credentials</span><b>{demoAccounts[role].label}</b></div>
+            <p><strong>Email</strong><code>{demoAccounts[role].email}</code></p>
+            <p><strong>Password</strong><code>{demoAccounts[role].password}</code></p>
+          </div>
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem', fontWeight: 600 }}>
-                <Building2 size={16} />
-                <span>Authenticate Company Account</span>
-                <ArrowRight size={16} />
-              </button>
-
-              {/* Quick Select Company Code Database Widget */}
-              <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid var(--border-light)' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  🔑 Quick Select Demo Company Codes:
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  {MOCK_COMPANY_DATABASE.map((company) => (
-                    <button
-                      key={company.code}
-                      type="button"
-                      onClick={() => fillQuickPreset(company)}
-                      style={{
-                        display: 'flex',
-                        justify: 'space-between',
-                        alignItems: 'center',
-                        background: companyCode === company.code ? 'var(--secondary-teal-light)' : 'var(--neutral-bg)',
-                        border: companyCode === company.code ? '1px solid var(--secondary-teal)' : '1px solid var(--border-subtle)',
-                        borderRadius: '6px',
-                        padding: '6px 10px',
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
-                        textAlign: 'left'
-                      }}
-                    >
-                      <div>
-                        <strong style={{ color: 'var(--primary-indigo)' }}>{company.code}</strong> — {company.name}
-                      </div>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Pass: {company.password}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </form>
-          ) : (
-            /* Employee Form */
-            <form onSubmit={handleEmployeeLogin}>
-              <div className="form-group">
-                <label className="form-label">Employee / Staff ID (Optional)</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value)}
-                  placeholder="e.g. EMP-4092 or Leave Blank"
-                  style={{ fontFamily: 'var(--font-mono)' }}
-                />
-              </div>
-
-              <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'var(--secondary-teal-light)', color: 'var(--secondary-teal)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                  <Lock size={26} />
-                </div>
-                <h3 style={{ fontSize: '1.05rem', color: 'var(--primary-indigo)', marginBottom: '0.4rem' }}>Zero-Knowledge Anonymous Access</h3>
-                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '1.25rem', lineHeight: 1.5 }}>
-                  You will be issued an anonymous encrypted token to safely submit workplace feedback or harassment reports.
-                </p>
-                <button type="submit" className="btn btn-coral" style={{ width: '100%', padding: '0.75rem', fontWeight: 600 }}>
-                  <Lock size={16} />
-                  <span>Enter Anonymous Safety Portal</span>
-                  <ArrowRight size={16} />
-                </button>
-              </div>
-            </form>
-          )}
+          <p className="candidate-link">Applying for a role? <Link to="/apply">Submit your resume</Link></p>
         </div>
-
-        {/* Candidate hiring prompt */}
-        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Are you a job seeker / candidate? </span>
-          <Link to="/apply" style={{ fontSize: '0.85rem', color: 'var(--secondary-teal)', fontWeight: 600, textDecoration: 'none' }}>
-            Submit your Resume here →
-          </Link>
-        </div>
-
-        {/* Footer badges */}
-        <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Shield size={12} /> SOC2 Type II</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><UserCheck size={12} /> GDPR Compliant</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Lock size={12} /> 256-Bit Encrypted</span>
-        </div>
-      </div>
-    </div>
+      </section>
+      <style>{styles}</style>
+    </main>
   );
 }
+
+const styles = `
+.login-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:#f4f5f8}.login-story{display:flex;flex-direction:column;justify-content:space-between;padding:42px 7vw;background:linear-gradient(145deg,#22265c,#343b82);color:#fff}.login-brand{display:flex;align-items:center;gap:10px;width:max-content;color:#fff;text-decoration:none;font-family:var(--font-serif);font-size:20px}.login-brand b{width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,#57bfaa,#e85d4e);font-size:17px}.login-story>div{max-width:560px}.login-eyebrow{display:flex;align-items:center;gap:7px;color:#76d9c7;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.login-story h1{margin:18px 0;font-family:var(--font-serif);font-size:clamp(42px,5vw,68px);line-height:1.02;letter-spacing:-.045em}.login-story>div>p{max-width:520px;color:rgba(255,255,255,.68);font-size:16px;line-height:1.65}.security-points{display:flex;flex-direction:column;gap:12px;margin-top:30px}.security-points span{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,.82);font-size:13px}.security-points svg{color:#76d9c7}.login-story>small{color:rgba(255,255,255,.42);font-size:11px}.login-area{display:grid;place-items:center;padding:35px}.login-card{width:100%;max-width:470px;padding:34px;border:1px solid var(--border-light);border-radius:24px;background:#fff;box-shadow:0 25px 70px rgba(38,42,92,.1)}.login-heading>span{color:var(--secondary-teal);font-size:11px;font-weight:800;text-transform:uppercase}.login-heading h2{margin:5px 0 4px;color:var(--primary-indigo);font-family:var(--font-serif);font-size:31px}.login-heading p{color:var(--text-muted);font-size:13px}.role-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:24px 0;padding:5px;border-radius:13px;background:var(--neutral-bg)}.role-switch button{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border:0;border-radius:9px;background:transparent;color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer}.role-switch button.active{background:#fff;color:var(--primary-indigo);box-shadow:0 3px 12px rgba(37,41,99,.08)}.login-error{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:11px 12px;border-radius:10px;background:#fbe6e3;color:#a9463b;font-size:12px}.login-card form{display:flex;flex-direction:column;gap:16px}.login-card form>label>span{display:block;margin-bottom:7px;color:var(--text-dark);font-size:12px;font-weight:700}.login-card form>label>div{display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid var(--border-light);border-radius:11px;color:var(--text-muted)}.login-card input{width:100%;padding:12px 0;border:0;outline:0;background:transparent;color:var(--text-dark);font-size:14px}.login-card form label button{display:grid;place-items:center;border:0;background:transparent;color:var(--text-muted);cursor:pointer}.login-submit{display:flex;align-items:center;justify-content:space-between;margin-top:4px;padding:13px 15px;border:0;border-radius:11px;background:var(--primary-indigo);color:#fff;font-size:13px;font-weight:800;cursor:pointer}.login-submit:disabled{opacity:.65;cursor:wait}.demo-credential{margin-top:22px;padding:14px;border:1px solid #dcece8;border-radius:12px;background:#f4fbf9}.demo-credential>div{display:flex;justify-content:space-between;margin-bottom:9px}.demo-credential>div span{color:#267f70;font-size:10px;font-weight:800;text-transform:uppercase}.demo-credential>div b{color:var(--text-muted);font-size:10px}.demo-credential p{display:grid;grid-template-columns:65px 1fr;padding:3px 0;font-size:11px}.demo-credential strong{color:var(--text-muted)}.demo-credential code{color:var(--primary-indigo);font-weight:700}.candidate-link{margin-top:20px;color:var(--text-muted);text-align:center;font-size:12px}.candidate-link a{color:var(--secondary-teal);font-weight:750;text-decoration:none}@media(max-width:850px){.login-page{grid-template-columns:1fr}.login-story{min-height:330px;padding:30px}.login-story h1{font-size:42px}.login-story>small,.security-points{display:none}.login-area{padding:25px 15px}.login-card{padding:25px}}
+`;

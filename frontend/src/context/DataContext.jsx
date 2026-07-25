@@ -6,13 +6,21 @@ import initialBiasAlerts from '../dataset/bias_alerts.json';
 import initialSafetyReports from '../dataset/safety_reports.json';
 import initialCandidates from '../dataset/candidates.json';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = '/api';
 
 const DataContext = createContext();
 const employeeDatasetSignature = JSON.stringify(initialEmployees);
+const authorizedHeaders = () => {
+  try {
+    const token = JSON.parse(localStorage.getItem('fairlens_auth_session'))?.token;
+    return token ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } : { 'Content-Type': 'application/json' };
+  } catch {
+    return { 'Content-Type': 'application/json' };
+  }
+};
 
-async function fetchJSON(url) {
-  const response = await fetch(url);
+async function fetchJSON(url, options) {
+  const response = await fetch(url, options);
   const contentType = response.headers.get('content-type') || '';
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
   if (!contentType.includes('application/json')) {
@@ -117,7 +125,9 @@ export function DataProvider({ children }) {
     let active = true;
     const loadSafetyReports = async () => {
       try {
-        const data = await fetchJSON(`${API_BASE}/safety-reports`);
+        const session = JSON.parse(localStorage.getItem('fairlens_auth_session') || '{}');
+        const endpoint = session.role === 'employee' ? '/safety-reports/mine' : '/safety-reports';
+        const data = await fetchJSON(`${API_BASE}${endpoint}`, { headers: authorizedHeaders() });
         if (!active || !Array.isArray(data)) return;
         setSafetyReports(previous => {
           const localOnly = previous.filter(local => !data.some(remote => remote.id === local.id));
@@ -215,7 +225,7 @@ export function DataProvider({ children }) {
     try {
       await fetch(`${API_BASE}/employees`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authorizedHeaders(),
         body: JSON.stringify(formatted)
       });
     } catch (err) {
@@ -238,7 +248,7 @@ export function DataProvider({ children }) {
     try {
       await fetch(`${API_BASE}/employees/${empId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authorizedHeaders(),
         body: JSON.stringify({ salary: updatedSalaryNum })
       });
     } catch (err) {
@@ -249,7 +259,7 @@ export function DataProvider({ children }) {
   const dismissBiasAlert = async (alertId) => {
     setBiasAlerts(prev => prev.filter(a => a.id !== alertId));
     try {
-      await fetch(`${API_BASE}/bias-alerts/${alertId}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/bias-alerts/${alertId}`, { method: 'DELETE', headers: authorizedHeaders() });
     } catch (err) { console.log(err); }
   };
 
@@ -309,6 +319,7 @@ export function DataProvider({ children }) {
       date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       status: 'Pending Review',
       narrative: report.narrative,
+      ownerEmployeeId: report.ownerEmployeeId || null,
       evidenceFiles: report.evidenceFiles || [],
       chatHistory: [{
         sender: 'System',
@@ -320,7 +331,7 @@ export function DataProvider({ children }) {
     try {
       const response = await fetch(`${API_BASE}/safety-reports`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authorizedHeaders(),
         body: JSON.stringify(formatted),
       });
       if (response.ok) {
@@ -342,7 +353,7 @@ export function DataProvider({ children }) {
     try {
       await fetch(`${API_BASE}/safety-reports/${reportId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authorizedHeaders(),
         body: JSON.stringify({ status }),
       });
     } catch {
@@ -358,7 +369,7 @@ export function DataProvider({ children }) {
     try {
       await fetch(`${API_BASE}/safety-reports/${reportId}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authorizedHeaders(),
         body: JSON.stringify({ sender, text }),
       });
     } catch {
@@ -366,10 +377,6 @@ export function DataProvider({ children }) {
     }
     return message;
   };
-
-  const findSafetyReportByPasskey = (passkey) => safetyReports.find(
-    item => item.passkey && item.passkey.toLowerCase() === passkey.trim().toLowerCase()
-  ) || null;
 
   const resetToJSONFile = () => {
     localStorage.removeItem('fairlens_employees');
@@ -402,7 +409,6 @@ export function DataProvider({ children }) {
       addSafetyReport,
       updateSafetyReportStatus,
       addSafetyMessage,
-      findSafetyReportByPasskey,
       dismissBiasAlert,
       resetToJSONFile
     }}>

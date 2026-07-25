@@ -1,17 +1,16 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, ShieldCheck, UploadCloud, Key, ArrowRight, CheckCircle2, LogIn, Send, MessageSquare, Paperclip, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import { Lock, ShieldCheck, UploadCloud, ArrowRight, CheckCircle2, LogIn, Send, MessageSquare, Paperclip, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
 export default function EmployeeReportingPortal({ embedded, onBackToDashboard }) {
-  const { logout } = useAuth();
-  const { safetyReports, addSafetyReport, addSafetyMessage, findSafetyReportByPasskey } = useData();
+  const { auth, logout } = useAuth();
+  const { safetyReports, addSafetyReport, addSafetyMessage } = useData();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [category, setCategory] = useState("Sexual Harassment / Unwelcome Conduct");
   const [narrative, setNarrative] = useState("");
-  const [passkey, setPasskey] = useState(null);
   const [caseId, setCaseId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -21,14 +20,10 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
   const fileInputRef = useRef(null);
   const [isFormMinimized, setIsFormMinimized] = useState(false);
 
-  // Anonymous chat state (used once a report exists, either just-submitted
-  // or reopened via passkey lookup)
+  // Anonymous chat state for reports linked to this authenticated employee.
   const [chatHistory, setChatHistory] = useState([]);
   const [chatMessage, setChatMessage] = useState("");
-  const [lookupPasskeyInput, setLookupPasskeyInput] = useState("");
-  const [lookupError, setLookupError] = useState(null);
-  const [lookupLoading, setLookupLoading] = useState(false);
-  const [copyFeedback, setCopyFeedback] = useState(false);
+  const myReports = safetyReports.filter(item => item.ownerEmployeeId === auth.employeeId);
   const sharedCase = safetyReports.find(item => item.id === caseId);
   const visibleChatHistory = sharedCase?.chatHistory || chatHistory;
 
@@ -132,8 +127,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const report = await addSafetyReport({ category, narrative, evidenceFiles });
-      setPasskey(report.passkey);
+      const report = await addSafetyReport({ category, narrative, evidenceFiles, ownerEmployeeId: auth.employeeId });
       setCaseId(report.id);
       setChatHistory(report.chatHistory);
       setStep(4);
@@ -145,22 +139,13 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
     }
   };
 
-  const handleLookupPasskey = async (e) => {
-    e.preventDefault();
-    setLookupLoading(true);
-    setLookupError(null);
-    try {
-      const report = findSafetyReportByPasskey(lookupPasskeyInput);
-      if (!report) throw new Error('No case found for this passkey');
-      setCaseId(report.id);
-      setPasskey(report.passkey);
-      setChatHistory(report.chatHistory || []);
-      setStep(5);
-    } catch {
-      setLookupError('No case found for this passkey. Double-check it and try again.');
-    } finally {
-      setLookupLoading(false);
-    }
+  const openMyReport = report => {
+    setCaseId(report.id);
+    setCategory(report.category);
+    setNarrative(report.narrative || '');
+    setEvidenceFiles(report.evidenceFiles || []);
+    setChatHistory(report.chatHistory || []);
+    setStep(5);
   };
 
   const handleSendChat = async (e) => {
@@ -240,7 +225,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
                 Zero-Knowledge Encrypted Session
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Your IP address is not logged. You will receive an anonymous claim passkey to check status.
+                Your identity remains hidden from case reviewers. Your reports and HR conversations stay available in this signed-in account.
               </div>
             </div>
           </div>
@@ -257,7 +242,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
                 Zero-Knowledge Encrypted Session
               </div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Your IP address is not logged. No login required. You will receive an anonymous claim passkey to check status safely.
+                Your identity remains hidden from case reviewers. This signed-in account securely retains access to your reports and conversations.
               </div>
             </div>
           </div>
@@ -276,7 +261,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
             <StepHeader num={1} label="Category" active={step === 1} done={step > 1} />
             <StepHeader num={2} label="Narrative" active={step === 2} done={step > 2} />
             <StepHeader num={3} label="Evidence Upload" active={step === 3} done={step > 3} />
-            <StepHeader num={4} label="Passkey Confirmation" active={step === 4} done={step === 4} />
+            <StepHeader num={4} label="Confirmation" active={step === 4} done={step === 4} />
           </div>
         )}
 
@@ -286,26 +271,21 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
               <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>Step 1: Select Allegation Category</h3>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Choose the category that best describes the incident.</p>
 
-              <div style={{ background: 'var(--neutral-bg)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '0.85rem', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Key size={14} color="var(--secondary-teal)" />
-                  Already filed a report? Check status or continue the chat
+              {myReports.length > 0 && (
+                <div style={{ background: 'var(--neutral-bg)', border: '1px solid var(--border-light)', borderRadius: '10px', padding: '0.9rem', marginBottom: '1.5rem' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.65rem', color: 'var(--primary-indigo)' }}>
+                    Your existing reports and conversations
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {myReports.map(report => (
+                      <button key={report.id} type="button" onClick={() => openMyReport(report)} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', padding: '0.75rem', border: '1px solid var(--border-light)', borderRadius: '8px', background: '#fff', textAlign: 'left', cursor: 'pointer' }}>
+                        <span><strong style={{ display: 'block', color: 'var(--text-dark)', fontSize: '0.83rem' }}>{report.category}</strong><small style={{ color: 'var(--text-muted)' }}>{report.id} · {report.date}</small></span>
+                        <span className="badge badge-teal">{report.status}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
-                    type="text"
-                    className="form-input"
-                    style={{ flex: 1, fontSize: '0.8rem' }}
-                    placeholder="Enter your passkey (FL-PASSKEY-...)"
-                    value={lookupPasskeyInput}
-                    onChange={(e) => setLookupPasskeyInput(e.target.value)}
-                  />
-                  <button type="button" onClick={handleLookupPasskey} disabled={lookupLoading || !lookupPasskeyInput.trim()} className="btn btn-outline btn-sm">
-                    {lookupLoading ? '...' : 'Open'}
-                  </button>
-                </div>
-                {lookupError && <div style={{ fontSize: '0.75rem', color: 'var(--danger-coral)', marginTop: '0.4rem' }}>{lookupError}</div>}
-              </div>
+              )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
                 <CategoryRadio
@@ -449,22 +429,15 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
               </div>
 
               <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>
-                Anonymous Report Submitted Securely
+                Report Submitted Securely
               </h2>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: '560px', margin: '0 auto 2rem auto' }}>
-                Your report has been encrypted and assigned to the HR DEI Case Triage Officer. Save your 24-character cryptographic passkey below to check status or communicate anonymously.
+                Your report has been encrypted and assigned to the HR case team. It is now saved to your account, so you can return to this conversation whenever you sign in.
               </p>
 
-              <div style={{ background: 'var(--primary-indigo)', color: '#FFF', padding: '1.5rem', borderRadius: 'var(--radius-card)', margin: '0 auto 2rem auto', maxWidth: '600px', boxShadow: 'var(--shadow-md)' }}>
-                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--secondary-teal)', fontWeight: 600, marginBottom: '0.4rem' }}>
-                  YOUR ANONYMOUS CLAIM PASSKEY
-                </div>
-                <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 'bold', letterSpacing: '0.05em' }}>
-                  {passkey}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.5rem' }}>
-                  ⚠️ Do not lose this key. It is the only cryptographic link to your report.
-                </div>
+              <div style={{ background: 'var(--primary-indigo)', color: '#FFF', padding: '1.25rem', borderRadius: 'var(--radius-card)', margin: '0 auto 2rem auto', maxWidth: '600px', boxShadow: 'var(--shadow-md)' }}>
+                <div style={{ color: 'var(--secondary-teal)', fontWeight: 700 }}>Case {caseId}</div>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.68)', marginTop: '0.35rem' }}>Access is linked to your authenticated employee account. No code is required.</div>
               </div>
 
               <button type="button" onClick={() => setStep(5)} className="btn btn-teal">
@@ -503,7 +476,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
                   <div><span style={{ color: 'var(--text-muted)' }}>Category:</span> <strong>{category}</strong></div>
                   <div><span style={{ color: 'var(--text-muted)' }}>Narrative:</span> {narrative.substring(0, 120)}{narrative.length > 120 ? '...' : ''}</div>
                   <div><span style={{ color: 'var(--text-muted)' }}>Evidence:</span> {evidenceFiles.length} file{evidenceFiles.length !== 1 ? 's' : ''}</div>
-                  <div><span style={{ color: 'var(--text-muted)' }}>Passkey:</span> <span className="font-mono" style={{ fontWeight: 'bold', fontSize: '0.75rem' }}>{passkey}</span></div>
+                  <div><span style={{ color: 'var(--text-muted)' }}>Access:</span> <strong>Saved to your employee account</strong></div>
                 </div>
               )}
             </div>
@@ -569,13 +542,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
             </div>
 
             <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
-              <button type="button" onClick={() => {
-                navigator.clipboard?.writeText(passkey);
-                setCopyFeedback(true);
-                setTimeout(() => setCopyFeedback(false), 2000);
-              }} className="btn btn-outline btn-sm" style={{ fontSize: '0.75rem', minWidth: '130px', transition: 'all 0.2s' }}>
-                {copyFeedback ? '✅ Copied!' : '📋 Copy Passkey'}
-              </button>
+              <button type="button" onClick={() => setStep(1)} className="btn btn-outline btn-sm">Start another report</button>
               <button type="button" onClick={handleQuickExit} className="btn btn-outline">
                 <ArrowRight size={16} />
                 <span>Back to Dashboard</span>

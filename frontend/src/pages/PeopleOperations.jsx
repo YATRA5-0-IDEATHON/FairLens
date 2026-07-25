@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Activity, BriefcaseBusiness, Filter, Search, ShieldCheck, SlidersHorizontal, Users } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = '/api';
 
 export default function PeopleOperations() {
   const { employees, candidates, updateCandidateStatus } = useData();

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api/resumes';
+const API_BASE_URL = '/api/resumes';
 
 const INITIAL_MOCK_CANDIDATES = [
   {

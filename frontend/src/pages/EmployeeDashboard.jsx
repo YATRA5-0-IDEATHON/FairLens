@@ -36,7 +36,7 @@ export default function EmployeeDashboard() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login?role=employee');
+    navigate('/login?role=employee', { replace: true });
   };
 
   // Calendar helpers

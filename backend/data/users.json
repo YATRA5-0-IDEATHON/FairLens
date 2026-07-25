@@ -1,0 +1,31 @@
+[
+  {
+    "id": "USR-HR-001",
+    "name": "Elena Rostova",
+    "email": "hr@fairlens.demo",
+    "password": "FairLens@2026",
+    "role": "hr",
+    "companyName": "FairLens Technologies",
+    "companyCode": "FL-2026"
+  },
+  {
+    "id": "USR-EMP-001",
+    "name": "Sam Scott",
+    "email": "employee@fairlens.demo",
+    "password": "Employee@2026",
+    "role": "employee",
+    "employeeId": "EMP-001",
+    "companyName": "FairLens Technologies",
+    "companyCode": "FL-2026"
+  },
+  {
+    "id": "USR-EMP-002",
+    "name": "ram Scott",
+    "email": "employee@fairlens.lemo",
+    "password": "Employee@2023",
+    "role": "employee",
+    "employeeId": "EMP-002",
+    "companyName": "FairLens Technologies",
+    "companyCode": "FL-2026"
+  }
+]

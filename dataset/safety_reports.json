@@ -1,5 +1,37 @@
 [
   {
+    "id": "SAFE-362",
+    "passkey": "FL-PASSKEY-QANMP1YY-DW00TAKT",
+    "category": "Sexual Harassment / Unwelcome Conduct",
+    "severity": "Standard",
+    "date": "July 26, 2026",
+    "status": "Pending Review",
+    "narrative": "chewan",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "04:19 AM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello",
+        "time": "04:19 AM"
+      },
+      {
+        "sender": "HR Officer",
+        "text": "chewan is bad",
+        "time": "04:19 AM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "help me",
+        "time": "04:20 AM"
+      }
+    ]
+  },
+  {
     "id": "SAFE-743",
     "passkey": "FL-PASSKEY-RVLXLS0Y-VQGX6NM3",
     "category": "Sexual Harassment / Unwelcome Conduct",
