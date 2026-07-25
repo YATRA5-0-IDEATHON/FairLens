@@ -13,7 +13,8 @@ import {
   Filter,
   X,
   RefreshCw,
-  Edit2
+  Edit2,
+  RotateCcw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -29,7 +30,8 @@ export default function HRDashboard() {
     setSelectedDeptFilter,
     addEmployee,
     updateEmployeeSalary,
-    dismissBiasAlert
+    dismissBiasAlert,
+    resetToJSONFile
   } = useData();
 
   // State for Add Employee Modal
@@ -44,10 +46,10 @@ export default function HRDashboard() {
   const [editingEmpId, setEditingEmpId] = useState(null);
   const [editSalaryValue, setEditSalaryValue] = useState(160000);
 
-  const handleAddSubmit = (e) => {
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!newEmpName) return;
-    addEmployee({
+    await addEmployee({
       name: newEmpName,
       gender: newEmpGender,
       department: newEmpDept,
@@ -61,8 +63,8 @@ export default function HRDashboard() {
     setShowAddModal(false);
   };
 
-  const handleSalarySave = (id) => {
-    updateEmployeeSalary(id, editSalaryValue);
+  const handleSalarySave = async (id) => {
+    await updateEmployeeSalary(id, editSalaryValue);
     setEditingEmpId(null);
   };
 
@@ -74,7 +76,7 @@ export default function HRDashboard() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Executive HR & DEI Dashboard</h1>
-          <p className="page-subtitle">Real-time reactive equality index, pay parity analytics, and bias stream powered by JSON dataset.</p>
+          <p className="page-subtitle">Two-way synchronized equality index, pay parity analytics, and dataset engine.</p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -101,10 +103,10 @@ export default function HRDashboard() {
             <span>+ Add Employee</span>
           </button>
 
-          <Link to="/blind-screening" className="btn btn-outline btn-sm">
-            <FileText size={16} />
-            <span>Screen Resumes</span>
-          </Link>
+          <button className="btn btn-outline btn-sm" onClick={resetToJSONFile} title="Reload fresh data directly from dataset/employees.json file">
+            <RotateCcw size={14} />
+            <span>Reset to File JSON</span>
+          </button>
         </div>
       </div>
 
@@ -116,7 +118,7 @@ export default function HRDashboard() {
             <div className="stat-value" style={{ color: 'var(--primary-indigo)' }}>
               {overallEqualityScore}<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/100</span>
             </div>
-            <div className="badge badge-teal">Live Reactive</div>
+            <div className="badge badge-teal">Live Synchronized</div>
           </div>
           <div className="progress-bar-bg" style={{ marginTop: '0.5rem' }}>
             <div className="progress-bar-fill" style={{ width: `${overallEqualityScore}%`, background: 'linear-gradient(90deg, #3FA796, #2B2E6B)' }}></div>
@@ -147,7 +149,7 @@ export default function HRDashboard() {
           </div>
           <div className="stat-trend positive">
             <CheckCircle2 size={14} />
-            <span>Dataset Synchronized</span>
+            <span>Disk File & API Synced</span>
           </div>
         </div>
 
@@ -213,7 +215,7 @@ export default function HRDashboard() {
           <div>
             <h3 className="card-title">Interactive Employee Dataset</h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              Edit salary or demographics below to see the Overall Equality Score & Pay Gap update in real-time.
+              Edit salary or add employees below — modifications write directly back to <code>dataset/employees.json</code> on disk!
             </p>
           </div>
           <span className="badge badge-indigo">{filteredEmployees.length} Records Shown</span>
@@ -234,7 +236,7 @@ export default function HRDashboard() {
               </tr>
             </thead>
             <tbody>
-              {filteredEmployees.slice(0, 8).map((emp) => (
+              {filteredEmployees.slice(0, 10).map((emp) => (
                 <tr key={emp.id}>
                   <td className="font-mono" style={{ fontWeight: 'bold' }}>{emp.id}</td>
                   <td><strong>{emp.name}</strong></td>
@@ -261,7 +263,7 @@ export default function HRDashboard() {
                   <td>
                     {editingEmpId === emp.id ? (
                       <button className="btn btn-teal btn-sm" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleSalarySave(emp.id)}>
-                        Save
+                        Save to Disk
                       </button>
                     ) : (
                       <button className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => { setEditingEmpId(emp.id); setEditSalaryValue(emp.salary); }}>
@@ -380,7 +382,7 @@ export default function HRDashboard() {
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                 <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowAddModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-teal" style={{ flex: 2 }}>Add Record & Recalculate</button>
+                <button type="submit" className="btn btn-teal" style={{ flex: 2 }}>Save to Disk JSON & Recalculate</button>
               </div>
             </form>
           </div>

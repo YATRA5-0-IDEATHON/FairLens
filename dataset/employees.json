@@ -1,5 +1,18 @@
 [
   {
+    "name": "hjfdhfdbhfbdhfbdhfbhdfbdhfbdhfbhdfb",
+    "gender": "Female",
+    "department": "Engineering & Ops",
+    "role": "Senior Software Engineer",
+    "salary": 160000,
+    "level": "L4",
+    "experienceYears": 5,
+    "monthsInRole": 14,
+    "id": "EMP-834",
+    "status": "Active",
+    "performanceRating": 4.5
+  },
+  {
     "id": "EMP-101",
     "name": "Elena Rostova",
     "gender": "Female",
