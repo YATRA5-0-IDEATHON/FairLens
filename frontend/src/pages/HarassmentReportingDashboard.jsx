@@ -1,36 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ShieldAlert, Lock, Paperclip, Send, Clock, CheckCircle2, AlertTriangle, Filter } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
-const API_BASE = 'http://localhost:5000/api';
 const STATUS_OPTIONS = ['Pending Review', 'Under Investigation', 'Resolved'];
 const FILTER_TABS = ['All', 'Pending Review', 'Under Investigation', 'Resolved'];
 
 export default function HarassmentReportingDashboard() {
-  const [cases, setCases] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { safetyReports: cases, updateSafetyReportStatus, addSafetyMessage } = useData();
+  const [selectedId, setSelectedId] = useState(() => cases[0]?.id || null);
   const [statusFilter, setStatusFilter] = useState('All');
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
 
-  const fetchCases = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/safety-reports`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setCases(data);
-        setSelectedId(prev => prev || (data[0] && data[0].id));
-      }
-    } catch (err) {
-      console.log('Backend offline — start it with `cd backend && npm start` to see live cases:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchCases(); }, []);
-
-  const selectedCase = useMemo(() => cases.find(c => c.id === selectedId) || null, [cases, selectedId]);
+  const selectedCase = useMemo(() => cases.find(c => c.id === selectedId) || cases[0] || null, [cases, selectedId]);
 
   const filteredCases = useMemo(() => {
     if (statusFilter === 'All') return cases;
@@ -53,35 +35,13 @@ export default function HarassmentReportingDashboard() {
     const text = newMessage.trim();
     setNewMessage('');
     setSending(true);
-    // optimistic update
-    setCases(prev => prev.map(c => c.id === selectedCase.id
-      ? { ...c, chatHistory: [...c.chatHistory, { sender: 'HR Officer', text, time: 'Just now' }] }
-      : c));
-    try {
-      await fetch(`${API_BASE}/safety-reports/${selectedCase.id}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sender: 'HR Officer', text })
-      });
-    } catch (err) {
-      console.error('Failed to send reply:', err);
-    } finally {
-      setSending(false);
-    }
+    await addSafetyMessage(selectedCase.id, 'HR Officer', text);
+    setSending(false);
   };
 
   const handleStatusChange = async (newStatus) => {
     if (!selectedCase) return;
-    setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, status: newStatus } : c));
-    try {
-      await fetch(`${API_BASE}/safety-reports/${selectedCase.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-    } catch (err) {
-      console.error('Failed to update status:', err);
-    }
+    await updateSafetyReportStatus(selectedCase.id, newStatus);
   };
 
   return (
@@ -107,11 +67,9 @@ export default function HarassmentReportingDashboard() {
         <StatCard label="Resolved" value={stats.resolved} icon={<CheckCircle2 size={16} />} tone="teal" />
       </div>
 
-      {loading ? (
-        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading cases...</div>
-      ) : cases.length === 0 ? (
+      {cases.length === 0 ? (
         <div className="card" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          No cases yet — or the backend isn't running. Start it with <code>cd backend && npm start</code>.
+          No workplace safety cases have been submitted.
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.5rem' }}>

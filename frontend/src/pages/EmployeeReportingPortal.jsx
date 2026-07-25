@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, ShieldCheck, AlertTriangle, UploadCloud, Key, ArrowRight, CheckCircle2, LogIn, Send, MessageSquare, Paperclip, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import { Lock, ShieldCheck, UploadCloud, Key, ArrowRight, CheckCircle2, LogIn, Send, MessageSquare, Paperclip, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const API_BASE = 'http://localhost:5000/api';
+import { useData } from '../context/DataContext';
 
 export default function EmployeeReportingPortal({ embedded, onBackToDashboard }) {
-  const { auth, logout } = useAuth();
+  const { logout } = useAuth();
+  const { safetyReports, addSafetyReport, addSafetyMessage, findSafetyReportByPasskey } = useData();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [category, setCategory] = useState("Sexual Harassment / Unwelcome Conduct");
@@ -29,6 +29,8 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
   const [lookupError, setLookupError] = useState(null);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const sharedCase = safetyReports.find(item => item.id === caseId);
+  const visibleChatHistory = sharedCase?.chatHistory || chatHistory;
 
   const handleLogout = () => {
     logout();
@@ -130,18 +132,10 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const res = await fetch(`${API_BASE}/safety-reports`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, narrative, evidenceFiles })
-      });
-      const result = await res.json();
-      if (!res.ok || !result.success) {
-        throw new Error(result.error || 'Submission failed');
-      }
-      setPasskey(result.passkey);
-      setCaseId(result.id);
-      setChatHistory([{ sender: 'System', text: 'Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.', time: 'Just now' }]);
+      const report = await addSafetyReport({ category, narrative, evidenceFiles });
+      setPasskey(report.passkey);
+      setCaseId(report.id);
+      setChatHistory(report.chatHistory);
       setStep(4);
     } catch (err) {
       setSubmitError('Could not submit report — the server may be offline. Please try again.');
@@ -156,16 +150,13 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
     setLookupLoading(true);
     setLookupError(null);
     try {
-      const res = await fetch(`${API_BASE}/safety-reports/lookup/${encodeURIComponent(lookupPasskeyInput.trim())}`);
-      const result = await res.json();
-      if (!res.ok || !result.success) {
-        throw new Error(result.error || 'No case found for this passkey');
-      }
-      setCaseId(result.data.id);
-      setPasskey(result.data.passkey);
-      setChatHistory(result.data.chatHistory);
+      const report = findSafetyReportByPasskey(lookupPasskeyInput);
+      if (!report) throw new Error('No case found for this passkey');
+      setCaseId(report.id);
+      setPasskey(report.passkey);
+      setChatHistory(report.chatHistory || []);
       setStep(5);
-    } catch (err) {
+    } catch {
       setLookupError('No case found for this passkey. Double-check it and try again.');
     } finally {
       setLookupLoading(false);
@@ -177,37 +168,12 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
     if (!chatMessage.trim() || !caseId) return;
     const text = chatMessage.trim();
     setChatMessage("");
-    // optimistic update
-    setChatHistory(prev => [...prev, { sender: 'Anonymous Employee', text, time: 'Just now' }]);
-    try {
-      await fetch(`${API_BASE}/safety-reports/${caseId}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sender: 'Anonymous Employee', text })
-      });
-    } catch (err) {
-      console.error('Failed to send message:', err);
-    }
+    await addSafetyMessage(caseId, 'Anonymous Employee', text);
   };
 
-  // Re-fetch chat when viewing an existing case, so HR replies show up
-  const refreshChat = useCallback(async () => {
-    if (!caseId) return;
-    try {
-      const res = await fetch(`${API_BASE}/safety-reports/lookup/${encodeURIComponent(passkey)}`);
-      const result = await res.json();
-      if (result.success) setChatHistory(result.data.chatHistory);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [caseId, passkey]);
-
-  // Auto-refresh chat every 20 seconds when on step 5 (chat view)
-  useEffect(() => {
-    if (step !== 5 || !caseId) return;
-    const interval = setInterval(refreshChat, 20000);
-    return () => clearInterval(interval);
-  }, [step, caseId, refreshChat]);
+  const refreshChat = () => {
+    if (sharedCase) setChatHistory(sharedCase.chatHistory || []);
+  };
 
   return (
     <div style={{
@@ -560,13 +526,13 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
 
               {/* Chat messages area */}
               <div style={{ padding: '1rem', background: '#FFF', minHeight: '280px', maxHeight: '360px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {chatHistory.length === 0 ? (
+                {visibleChatHistory.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                     <MessageSquare size={32} style={{ marginBottom: '0.5rem', opacity: 0.4 }} />
                     <div>No messages yet. Send a message to start the conversation with HR.</div>
                   </div>
                 ) : (
-                  chatHistory.map((msg, idx) => (
+                  visibleChatHistory.map((msg, idx) => (
                     <div key={idx} style={{ alignSelf: msg.sender === 'Anonymous Employee' ? 'flex-end' : (msg.sender === 'System' ? 'center' : 'flex-start'), maxWidth: '85%' }}>
                       {msg.sender === 'System' ? (
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--neutral-bg)', padding: '0.2rem 0.6rem', borderRadius: '10px' }}>{msg.text}</div>

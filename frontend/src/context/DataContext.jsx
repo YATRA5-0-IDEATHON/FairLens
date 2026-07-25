@@ -76,6 +76,25 @@ export function DataProvider({ children }) {
     localStorage.setItem('fairlens_candidates', JSON.stringify(candidates));
   }, [candidates]);
 
+  // Keep separate FairLens tabs in sync without requiring a reload.
+  useEffect(() => {
+    const syncFromStorage = (event) => {
+      if (!event.newValue) return;
+      try {
+        const value = JSON.parse(event.newValue);
+        if (!Array.isArray(value)) return;
+        if (event.key === 'fairlens_employees') setEmployees(value);
+        if (event.key === 'fairlens_candidates') setCandidates(value);
+        if (event.key === 'fairlens_bias_alerts') setBiasAlerts(value);
+        if (event.key === 'fairlens_safety_reports') setSafetyReports(value);
+      } catch {
+        // Ignore incomplete or unrelated browser storage values.
+      }
+    };
+    window.addEventListener('storage', syncFromStorage);
+    return () => window.removeEventListener('storage', syncFromStorage);
+  }, []);
+
   // Fetch live dataset from backend API on mount
   useEffect(() => {
     const loadEmployees = async () => {
@@ -89,27 +108,32 @@ export function DataProvider({ children }) {
       }
     };
 
-<<<<<<< HEAD
-    fetch(`${API_BASE}/candidates`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCandidates(data);
-        }
-      })
-      .catch(err => console.log('Backend API offline, using local candidate dataset:', err));
-
-    fetch(`${API_BASE}/safety-reports`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setSafetyReports(data);
-        }
-      })
-      .catch(err => console.log('Backend API offline, using local safety reports dataset:', err));
-=======
     loadEmployees();
->>>>>>> f4a2726 (Complete Dynamic Pages)
+  }, []);
+
+  // Poll the optional API so HR and employee sessions on different devices
+  // receive new case messages and status changes without refreshing.
+  useEffect(() => {
+    let active = true;
+    const loadSafetyReports = async () => {
+      try {
+        const data = await fetchJSON(`${API_BASE}/safety-reports`);
+        if (!active || !Array.isArray(data)) return;
+        setSafetyReports(previous => {
+          const localOnly = previous.filter(local => !data.some(remote => remote.id === local.id));
+          const next = [...data, ...localOnly];
+          return JSON.stringify(next) === JSON.stringify(previous) ? previous : next;
+        });
+      } catch {
+        // Local shared state remains active while the optional API is offline.
+      }
+    };
+    loadSafetyReports();
+    const interval = window.setInterval(loadSafetyReports, 4000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   // Filtered employees by department
@@ -275,6 +299,78 @@ export function DataProvider({ children }) {
     setCandidates(prev => prev.map(c => (c.id === candId ? { ...c, status } : c)));
   };
 
+  const addSafetyReport = async (report) => {
+    const stamp = Date.now().toString();
+    const formatted = {
+      id: `SAFE-${stamp.slice(-4)}`,
+      passkey: `FL-${stamp.slice(-6)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+      category: report.category,
+      severity: report.severity || 'Standard',
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      status: 'Pending Review',
+      narrative: report.narrative,
+      evidenceFiles: report.evidenceFiles || [],
+      chatHistory: [{
+        sender: 'System',
+        text: 'Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.',
+        time: 'Just now',
+      }],
+    };
+    setSafetyReports(prev => [formatted, ...prev]);
+    try {
+      const response = await fetch(`${API_BASE}/safety-reports`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formatted),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result?.id || result?.passkey) {
+          const synced = { ...formatted, id: result.id || formatted.id, passkey: result.passkey || formatted.passkey };
+          setSafetyReports(prev => prev.map(item => item.id === formatted.id ? synced : item));
+          return synced;
+        }
+      }
+    } catch {
+      // Shared local state remains authoritative while the optional API is offline.
+    }
+    return formatted;
+  };
+
+  const updateSafetyReportStatus = async (reportId, status) => {
+    setSafetyReports(prev => prev.map(item => item.id === reportId ? { ...item, status } : item));
+    try {
+      await fetch(`${API_BASE}/safety-reports/${reportId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+    } catch {
+      // The update is already persisted in the shared local store.
+    }
+  };
+
+  const addSafetyMessage = async (reportId, sender, text) => {
+    const message = { sender, text, time: 'Just now' };
+    setSafetyReports(prev => prev.map(item => item.id === reportId
+      ? { ...item, chatHistory: [...(item.chatHistory || []), message] }
+      : item));
+    try {
+      await fetch(`${API_BASE}/safety-reports/${reportId}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sender, text }),
+      });
+    } catch {
+      // The message is already available to every page through shared state.
+    }
+    return message;
+  };
+
+  const findSafetyReportByPasskey = (passkey) => safetyReports.find(
+    item => item.passkey && item.passkey.toLowerCase() === passkey.trim().toLowerCase()
+  ) || null;
+
   const resetToJSONFile = () => {
     localStorage.removeItem('fairlens_employees');
     localStorage.removeItem('fairlens_employees_dataset_signature');
@@ -303,6 +399,10 @@ export function DataProvider({ children }) {
       updateEmployeeSalary,
       addCandidate,
       updateCandidateStatus,
+      addSafetyReport,
+      updateSafetyReportStatus,
+      addSafetyMessage,
+      findSafetyReportByPasskey,
       dismissBiasAlert,
       resetToJSONFile
     }}>

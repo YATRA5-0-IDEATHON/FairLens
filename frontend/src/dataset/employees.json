@@ -1,54 +1,5 @@
 [
   {
-<<<<<<< HEAD
-    "id": "EMP-101",
-    "name": "Elena Rostova",
-    "gender": "Female",
-    "department": "Executive Leadership",
-    "role": "VP of People & DEI",
-    "level": "VP",
-    "salary": 215000,
-    "experienceYears": 12,
-    "performanceRating": 4.9,
-    "monthsInRole": 24,
-    "status": "Active"
-  },
-  {
-    "id": "EMP-102",
-    "name": "Marcus Vance",
-    "gender": "Male",
-    "department": "Executive Leadership",
-    "role": "Chief Technology Officer",
-    "level": "VP",
-    "salary": 245000,
-    "experienceYears": 15,
-    "performanceRating": 4.8,
-    "monthsInRole": 36,
-    "status": "Active"
-  },
-  {
-    "id": "EMP-103",
-    "name": "Priya Sharma",
-    "gender": "Female",
-    "department": "Engineering & Ops",
-    "role": "Staff Software Engineer",
-    "level": "L5",
-    "salary": 168000,
-    "experienceYears": 7,
-    "performanceRating": 4.9,
-    "monthsInRole": 34,
-    "status": "Active"
-  },
-  {
-    "id": "EMP-104",
-    "name": "David Chen",
-    "gender": "Male",
-    "department": "Engineering & Ops",
-    "role": "Staff Software Engineer",
-    "level": "L5",
-    "salary": 182000,
-    "experienceYears": 7,
-=======
     "id": "EMP-001",
     "name": "Sam Scott",
     "gender": "Female",
@@ -57,7 +8,6 @@
     "level": "L2",
     "salary": 78347,
     "experienceYears": 2,
->>>>>>> f4a2726 (Complete Dynamic Pages)
     "performanceRating": 4.7,
     "monthsInRole": 23,
     "status": "Active"

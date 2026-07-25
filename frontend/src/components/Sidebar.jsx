@@ -7,13 +7,7 @@ import {
   DollarSign, 
   TrendingUp, 
   ShieldAlert, 
-<<<<<<< HEAD
-  FileSpreadsheet, 
-  Settings as SettingsIcon
-=======
-  Lock, 
   FileSpreadsheet
->>>>>>> f4a2726 (Complete Dynamic Pages)
 } from 'lucide-react';
 
 export default function Sidebar() {
