@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import EqualityScoreRing from '../components/EqualityScoreRing';
-import { ShieldCheck, EyeOff, BarChart2, Award, Lock, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
+import { ShieldCheck, EyeOff, BarChart2, Award, Lock, ArrowRight, CheckCircle2, ChevronRight, UserCheck, Briefcase, Building2 } from 'lucide-react';
 
 export default function LandingPage() {
   const [empCount, setEmpCount] = useState(250);
+  const navigate = useNavigate();
 
-  // Simple ROI / Risk calculation formula
+  // ROI / Risk calculation formula
   const riskReduction = Math.round(empCount * 180);
   const payGapSaved = (empCount * 420).toLocaleString();
 
   return (
     <div style={{ backgroundColor: 'var(--neutral-bg)', minHeight: '100vh', color: 'var(--text-dark)' }}>
       {/* Navbar */}
-      <nav style={{ background: 'var(--primary-indigo)', color: '#FFF', padding: '1.25rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ width: '38px', height: '38px', background: 'linear-gradient(135deg, #3FA796, #E85D4E)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-serif)', fontSize: '1.3rem' }}>
+      <nav style={{ background: 'var(--primary-indigo)', color: '#FFF', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, boxShadow: 'var(--shadow-md)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <div style={{ width: '38px', height: '38px', background: 'linear-gradient(135deg, #3FA796, #E85D4E)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-serif)', fontSize: '1.3rem', color: '#FFF' }}>
             FL
           </div>
           <div>
@@ -24,46 +25,63 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', fontSize: '0.9rem' }}>
-          <a href="#features" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Features</a>
-          <a href="#calculator" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>ROI Calculator</a>
-          <a href="#compliance" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Compliance</a>
+        <div style={{ display: 'flex', gap: '1.8rem', alignItems: 'center', fontSize: '0.9rem' }}>
+          <a href="#features" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontWeight: 500 }}>Features</a>
+          <a href="#calculator" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontWeight: 500 }}>ROI Calculator</a>
+          <Link to="/apply" style={{ color: 'var(--secondary-teal)', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <Briefcase size={15} />
+            <span>Candidate Hiring</span>
+          </Link>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <Link to="/employee-portal" className="btn btn-coral btn-sm">
-            <Lock size={14} />
-            <span>Anonymous Portal</span>
+        {/* Action Buttons: HR Login & Employee Login */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <Link to="/apply" className="btn btn-teal btn-sm">
+            <Briefcase size={14} />
+            <span>Apply / Send Resume</span>
           </Link>
-          <Link to="/login" className="btn btn-teal btn-sm">
-            <span>HR Dashboard Login</span>
+          <Link to="/login?role=employee" className="btn btn-coral btn-sm">
+            <Lock size={14} />
+            <span>Employee Login</span>
+          </Link>
+          <Link to="/login?role=hr" className="btn btn-primary btn-sm" style={{ background: '#3D418C', border: '1px solid rgba(255,255,255,0.3)' }}>
+            <Building2 size={14} />
+            <span>HR Login</span>
             <ArrowRight size={14} />
           </Link>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <header style={{ padding: '5rem 2rem', maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem', alignItems: 'center' }}>
+      <header style={{ padding: '4.5rem 2rem', maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem', alignItems: 'center' }}>
         <div>
           <div className="badge badge-indigo" style={{ marginBottom: '1rem' }}>
             <ShieldCheck size={14} />
             <span>SOC2 & EEO-1 Certified Gender Equality Platform</span>
           </div>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '3.5rem', lineHeight: 1.15, color: 'var(--primary-indigo)', marginBottom: '1.25rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '3.4rem', lineHeight: 1.15, color: 'var(--primary-indigo)', marginBottom: '1.25rem' }}>
             See Hiring Clearly. <br />
             <span style={{ color: 'var(--secondary-teal)' }}>Eliminate Bias.</span>
           </h1>
-          <p style={{ fontSize: '1.15rem', color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: '560px' }}>
+          <p style={{ fontSize: '1.15rem', color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: '560px', lineHeight: 1.6 }}>
             FairLens uses audited AI engines to redact demographic identifiers in recruitment, audit pay parity, detect promotion bottlenecks, and protect workplace safety.
           </p>
+          
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <Link to="/dashboard" className="btn btn-primary btn-lg">
-              <span>Explore HR Live Platform</span>
+            <Link to="/login?role=hr" className="btn btn-primary btn-lg">
+              <Building2 size={18} />
+              <span>HR Organization Login</span>
               <ChevronRight size={18} />
             </Link>
-            <Link to="/blind-screening" className="btn btn-outline btn-lg">
-              <EyeOff size={18} />
-              <span>Try Blind Screening Demo</span>
+
+            <Link to="/login?role=employee" className="btn btn-coral btn-lg">
+              <Lock size={18} />
+              <span>Employee Portal Access</span>
+            </Link>
+
+            <Link to="/apply" className="btn btn-outline btn-lg">
+              <Briefcase size={18} />
+              <span>Candidate Resume Upload</span>
             </Link>
           </div>
         </div>
@@ -92,6 +110,27 @@ export default function LandingPage() {
           </div>
         </div>
       </header>
+
+      {/* Quick Action Access Banner */}
+      <section style={{ background: 'var(--primary-indigo)', color: '#FFF', padding: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.25rem', color: '#FFF', margin: 0, fontFamily: 'var(--font-serif)' }}>Select Portal to Get Started</h3>
+            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', margin: '0.2rem 0 0 0' }}>Dedicated access pathways for HR Leaders, Employees, and Job Applicants.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <button className="btn btn-teal btn-sm" onClick={() => navigate('/login?role=hr')}>
+              🏢 HR Login (Company Code)
+            </button>
+            <button className="btn btn-coral btn-sm" onClick={() => navigate('/login?role=employee')}>
+              🔒 Employee Anonymous Login
+            </button>
+            <button className="btn btn-outline btn-sm" style={{ color: '#FFF', borderColor: 'rgba(255,255,255,0.4)', background: 'transparent' }} onClick={() => navigate('/apply')}>
+              📄 Send Resume / Hiring Portal
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Core Features Grid */}
       <section id="features" style={{ background: 'var(--surface-white)', padding: '5rem 2rem', borderTop: '1px solid var(--border-light)' }}>

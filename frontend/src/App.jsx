@@ -6,9 +6,10 @@ import { DataProvider } from './context/DataContext';
 import Sidebar from './components/Sidebar';
 import TopNavbar from './components/TopNavbar';
 
-// Import All 13 Pages
+// Import Pages
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+import CandidateHiring from './pages/CandidateHiring';
 import HRDashboard from './pages/HRDashboard';
 import BlindResumeScreening from './pages/BlindResumeScreening';
 import CandidateComparison from './pages/CandidateComparison';
@@ -40,9 +41,10 @@ export default function App() {
     <DataProvider>
       <Router>
         <Routes>
-          {/* Public Landing & Login */}
+          {/* Public Landing, Login & Hiring Application */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/apply" element={<CandidateHiring />} />
 
           {/* Anonymous Employee Portal (Standalone without HR Sidebar) */}
           <Route path="/employee-portal" element={<EmployeeReportingPortal />} />
