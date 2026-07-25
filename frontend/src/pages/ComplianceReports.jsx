@@ -1,6 +1,5 @@
-import React from 'react';
 import EqualityScoreRing from '../components/EqualityScoreRing';
-import { FileSpreadsheet, Download, ShieldCheck, Printer, CheckCircle2 } from 'lucide-react';
+import { Download, ShieldCheck, Printer } from 'lucide-react';
 
 export default function ComplianceReports() {
   return (

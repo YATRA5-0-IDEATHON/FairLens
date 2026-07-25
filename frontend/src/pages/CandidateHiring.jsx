@@ -1,36 +1,56 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, EyeOff, Upload, FileText, Image as ImageIcon, CheckCircle2, ArrowRight, Lock, Sparkles, Building2 } from 'lucide-react';
-import { uploadResume } from '../services/resumeService';
+import { ShieldCheck, EyeOff, Upload, CheckCircle2, ArrowRight, Sparkles, Building2, AlertCircle, LoaderCircle } from 'lucide-react';
+import { useData } from '../context/DataContext';
+import { buildResumeIntelligence } from '../utils/resumeIntelligence';
+import { extractContactDetails, extractResumeFile } from '../utils/resumeFileExtractor';
+import { structureRawOcrText, anonymizeStructuredText, computeMeritScore } from '../utils/resumeProcessor';
 
 export default function CandidateHiring() {
+  const { addCandidate } = useData();
   const [jobTitle, setJobTitle] = useState('Senior Full Stack Software Engineer');
   const [candidateName, setCandidateName] = useState('');
   const [candidateEmail, setCandidateEmail] = useState('');
   
-  // Upload Type: 'image' or 'text'
-  const [uploadMode, setUploadMode] = useState('image');
-  
-  // Image state
   const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   
   // Raw text state
   const [resumeText, setResumeText] = useState('');
+  const [extractionStatus, setExtractionStatus] = useState('');
+  const [extractionError, setExtractionError] = useState('');
+  const [resumeAnalysis, setResumeAnalysis] = useState(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedCandidate, setSubmittedCandidate] = useState(null);
 
   const navigate = useNavigate();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
-      const url = URL.createObjectURL(file);
-      setImagePreviewUrl(url);
+  const processFile = async (file) => {
+    if (!file) return;
+    setSelectedImage(file);
+    setExtractionError('');
+    setResumeAnalysis(null);
+    try {
+      const text = await extractResumeFile(file, setExtractionStatus);
+      setResumeText(text);
+      const contact = extractContactDetails(text);
+      if (!candidateName && contact.name) setCandidateName(contact.name);
+      if (!candidateEmail && contact.email) setCandidateEmail(contact.email);
+      setResumeAnalysis(buildResumeIntelligence({
+        id: `preview-${Date.now()}`,
+        name: contact.name,
+        email: contact.email,
+        resumeText: text,
+        appliedRole: jobTitle,
+      }));
+      setExtractionStatus('Extraction complete');
+    } catch (error) {
+      setExtractionError(error.message || 'Could not read this resume.');
+      setExtractionStatus('');
     }
   };
+
+  const handleImageChange = (e) => processFile(e.target.files[0]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -39,20 +59,7 @@ export default function CandidateHiring() {
   const handleDrop = (e) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.startsWith('image/')) {
-        setSelectedImage(file);
-        setImagePreviewUrl(URL.createObjectURL(file));
-        setUploadMode('image');
-      } else {
-        // Assume text/doc file
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setResumeText(event.target.result);
-          setUploadMode('text');
-        };
-        reader.readAsText(file);
-      }
+      processFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -60,18 +67,35 @@ export default function CandidateHiring() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Prepare text representation (or image metadata payload)
-    let payloadText = resumeText;
-    if (uploadMode === 'image' && imagePreviewUrl) {
-      payloadText = `${candidateName || 'Candidate'}\nEmail: ${candidateEmail || 'candidate@email.com'}\nApplied Position: ${jobTitle}\n[Attached Resume Image Document]\nExperienced professional with proficiency in React, Node.js, SQL, system architecture, and cloud deployment. 5+ years experience.`;
-    }
+    const analysis = resumeAnalysis || buildResumeIntelligence({
+      id: `candidate-${Date.now()}`, name: candidateName, email: candidateEmail,
+      resumeText, appliedRole: jobTitle,
+    });
 
-    if (!payloadText.trim()) {
-      payloadText = `Applicant: ${candidateName || 'Anonymous Applicant'}\nRole: ${jobTitle}\nSkills: Software Engineering, Data Analysis, System Design\nYears of Exp: 4`;
-    }
+    // Structure + redact now so we can show the applicant how many PII fields were masked
+    const structured = structureRawOcrText(resumeText);
+    const redactionPreview = anonymizeStructuredText(structured, {
+      name: candidateName,
+      email: candidateEmail,
+    });
 
-    const createdCandidate = await uploadResume(payloadText, jobTitle);
-    setSubmittedCandidate(createdCandidate);
+    const skills = Object.values(analysis.categorizedSkills).flat();
+
+    const created = await addCandidate({
+      name: candidateName,
+      email: candidateEmail,
+      appliedRole: jobTitle,
+      resumeText,
+      summary: analysis.summary,
+      skills,
+      experienceYears: analysis.experienceYears,
+      education: analysis.education,
+      // Use the same canonical formula shown everywhere else in the app,
+      // so the stored score always matches what HR sees later.
+      meritScore: computeMeritScore(resumeText, skills),
+    });
+
+    setSubmittedCandidate({ ...created, redactedCount: redactionPreview.redactedCount });
     setIsSubmitting(false);
   };
 
@@ -126,13 +150,13 @@ export default function CandidateHiring() {
               Application Submitted Successfully!
             </h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-              Your resume has been anonymized and added to the hiring pipeline for <strong style={{ color: 'var(--primary-indigo)' }}>{submittedCandidate.jobTitle}</strong>.
+              Your resume has been anonymized and added to the hiring pipeline for <strong style={{ color: 'var(--primary-indigo)' }}>{submittedCandidate.appliedRole}</strong>.
             </p>
 
             <div style={{ background: 'var(--neutral-bg)', border: '1px solid var(--border-light)', borderRadius: '12px', padding: '1.5rem', maxWidth: '500px', margin: '0 auto 2rem auto', textAlign: 'left' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Anonymous Candidate Code:</span>
-                <span className="font-mono" style={{ fontWeight: 700, color: 'var(--secondary-teal)' }}>{submittedCandidate.candidateCode}</span>
+                <span className="font-mono" style={{ fontWeight: 700, color: 'var(--secondary-teal)' }}>{submittedCandidate.id}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Status:</span>
@@ -140,12 +164,12 @@ export default function CandidateHiring() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>PII Elements Redacted:</span>
-                <span style={{ fontWeight: 600 }}>{submittedCandidate.redactedCount || 5} Demographic Tags</span>
+                <span style={{ fontWeight: 600 }}>{submittedCandidate.redactedCount || 0} Fields Masked</span>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-              <button className="btn btn-outline" onClick={() => { setSubmittedCandidate(null); setImagePreviewUrl(null); setSelectedImage(null); setResumeText(''); }}>
+              <button className="btn btn-outline" onClick={() => { setSubmittedCandidate(null); setSelectedImage(null); setResumeText(''); setResumeAnalysis(null); }}>
                 Submit Another Resume
               </button>
               <Link to="/blind-screening" className="btn btn-primary">
@@ -209,33 +233,11 @@ export default function CandidateHiring() {
             <div style={{ marginBottom: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
                 <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', margin: 0 }}>
-                  2. Upload Resume Document or Resume Image
+                  2. Upload PDF Resume
                 </h3>
-                
-                {/* Mode Selector */}
-                <div className="tab-switcher" style={{ margin: 0 }}>
-                  <button 
-                    type="button" 
-                    className={`tab-btn ${uploadMode === 'image' ? 'active' : ''}`}
-                    onClick={() => setUploadMode('image')}
-                  >
-                    <ImageIcon size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                    Resume Image (JPG/PNG)
-                  </button>
-                  <button 
-                    type="button" 
-                    className={`tab-btn ${uploadMode === 'text' ? 'active' : ''}`}
-                    onClick={() => setUploadMode('text')}
-                  >
-                    <FileText size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                    Paste Text / PDF
-                  </button>
-                </div>
               </div>
 
-              {uploadMode === 'image' ? (
-                /* Drag and drop image area */
-                <div>
+              <div>
                   <div 
                     onDragOver={handleDragOver} 
                     onDrop={handleDrop}
@@ -251,7 +253,7 @@ export default function CandidateHiring() {
                   >
                     <input 
                       type="file" 
-                      accept="image/*" 
+                      accept=".pdf,application/pdf"
                       id="resume-image-input" 
                       onChange={handleImageChange}
                       style={{ display: 'none' }} 
@@ -262,49 +264,28 @@ export default function CandidateHiring() {
                         <Upload size={28} />
                       </div>
                       <h4 style={{ fontSize: '1.1rem', color: 'var(--primary-indigo)', marginBottom: '0.4rem' }}>
-                        Drag & Drop Resume Image Here
+                        Drag & Drop Your Resume Here
                       </h4>
                       <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        Supports PNG, JPG, WEBP formats. Click to browse files.
+                        PDF documents only — text is extracted automatically.
                       </p>
                     </label>
                   </div>
 
-                  {/* Image Preview Canvas */}
-                  {imagePreviewUrl && (
-                    <div style={{ marginTop: '1.5rem', background: 'var(--neutral-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                        <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary-indigo)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <ImageIcon size={16} /> Resume Image Canvas Preview:
-                        </span>
-                        <span className="badge badge-teal">
-                          <EyeOff size={12} /> FairLens Auto-Redaction Active
-                        </span>
-                      </div>
-
-                      <div style={{ textAlign: 'center', background: '#FFF', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
-                        <img 
-                          src={imagePreviewUrl} 
-                          alt="Uploaded Resume Preview" 
-                          style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '6px' }} 
-                        />
-                      </div>
+                  {extractionStatus && (
+                    <div style={{ marginTop: '1rem', color: 'var(--secondary-teal)', display: 'flex', alignItems: 'center', gap: '.5rem', fontSize: '.85rem', fontWeight: 600 }}>
+                      {extractionStatus !== 'Extraction complete' && <LoaderCircle size={16} className="spin" />}
+                      {extractionStatus === 'Extraction complete' && <CheckCircle2 size={16} />}
+                      {extractionStatus}
+                      {selectedImage?.name && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— {selectedImage.name}</span>}
                     </div>
                   )}
-                </div>
-              ) : (
-                /* Text / PDF paste area */
-                <div>
-                  <textarea 
-                    className="form-textarea"
-                    rows={10}
-                    placeholder="Paste full resume text content here..."
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}
-                  ></textarea>
-                </div>
-              )}
+                  {extractionError && (
+                    <div style={{ marginTop: '1rem', color: 'var(--accent-coral)', display: 'flex', alignItems: 'center', gap: '.5rem', fontSize: '.85rem' }}>
+                      <AlertCircle size={16} /> {extractionError}
+                    </div>
+                  )}
+              </div>
             </div>
 
             {/* Blind Guarantee box */}
@@ -323,7 +304,7 @@ export default function CandidateHiring() {
               <button 
                 type="submit" 
                 className="btn btn-teal btn-lg"
-                disabled={isSubmitting || (uploadMode === 'image' && !selectedImage && !resumeText) || (uploadMode === 'text' && !resumeText.trim())}
+                disabled={isSubmitting || !resumeText.trim() || !resumeAnalysis}
               >
                 <Sparkles size={18} />
                 <span>{isSubmitting ? 'Processing Application...' : 'Submit Blind Application'}</span>

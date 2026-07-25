@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Settings as SettingsIcon, ShieldCheck, Sliders, Lock, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { Sliders } from 'lucide-react';
 
 export default function Settings() {
   const [payThreshold, setPayThreshold] = useState(3.0);

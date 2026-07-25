@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -11,8 +10,7 @@ import {
   ShieldAlert, 
   Lock, 
   FileSpreadsheet, 
-  Settings as SettingsIcon,
-  Sparkles
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 export default function Sidebar() {

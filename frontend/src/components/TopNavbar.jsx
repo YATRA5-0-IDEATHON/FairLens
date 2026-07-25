@@ -1,5 +1,4 @@
-import React from 'react';
-import { Search, Bell, Shield, Sparkles, HelpCircle } from 'lucide-react';
+import { Search, Bell, Shield, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function TopNavbar() {

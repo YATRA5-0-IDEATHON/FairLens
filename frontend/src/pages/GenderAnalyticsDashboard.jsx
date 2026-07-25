@@ -1,5 +1,4 @@
-import React from 'react';
-import { BarChart3, TrendingUp, Users, ArrowDownRight, ShieldCheck } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 
 export default function GenderAnalyticsDashboard() {
   return (

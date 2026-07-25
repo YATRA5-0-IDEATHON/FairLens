@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+<<<<<<< HEAD
 import { Lock, Shield, ArrowRight, UserCheck, Building2, Key, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+=======
+import { Lock, Shield, ArrowRight, UserCheck, Building2, CheckCircle, AlertCircle } from 'lucide-react';
+>>>>>>> 849303e (Resume scanner)
 
 // Mock Company Code Database for Authentication
 const MOCK_COMPANY_DATABASE = [
@@ -28,13 +32,6 @@ export default function Login() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const roleParam = searchParams.get('role');
-    if (roleParam === 'employee' || roleParam === 'hr') {
-      setActiveTab(roleParam);
-    }
-  }, [searchParams]);
 
   const handleHRLogin = (e) => {
     e.preventDefault();

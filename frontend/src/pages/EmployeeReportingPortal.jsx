@@ -1,7 +1,12 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, ShieldCheck, AlertTriangle, UploadCloud, Key, ArrowRight, CheckCircle2, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+=======
+import { useState } from 'react';
+import { Lock, ShieldCheck, UploadCloud, ArrowRight, CheckCircle2, LogOut } from 'lucide-react';
+>>>>>>> 849303e (Resume scanner)
 
 export default function EmployeeReportingPortal({ embedded, onBackToDashboard }) {
   const { auth, logout } = useAuth();

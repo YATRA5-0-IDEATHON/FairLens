@@ -38,17 +38,20 @@ export const previewResumeAnonymization = async (rawText) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/preview`, { rawText });
     return response.data.data;
-  } catch (error) {
+  } catch {
     return mockAnonymize(rawText);
   }
 };
 
-export const uploadResume = async (rawText, jobTitle) => {
+export const uploadResume = async (rawText, jobTitle, structuredData = {}) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/upload`, { rawText, jobTitle });
+    const response = await axios.post(`${API_BASE_URL}/upload`, { rawText, jobTitle, structuredData });
     return response.data.data;
-  } catch (error) {
+  } catch {
     const anonymized = mockAnonymize(rawText);
+    const safeIntelligence = structuredData.intelligence
+      ? { ...structuredData.intelligence, rawText: undefined }
+      : undefined;
     const newCandidate = {
       _id: `local-${Date.now()}`,
       candidateCode: `CAND-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -61,21 +64,28 @@ export const uploadResume = async (rawText, jobTitle) => {
       rating: 0,
       evaluationNotes: '',
       status: 'New',
+      ...structuredData,
+      candidateName: undefined,
+      candidateEmail: undefined,
+      intelligence: safeIntelligence,
       createdAt: new Date().toISOString()
     };
+    const stored = JSON.parse(localStorage.getItem('fairlens_resumes') || '[]');
+    localStorage.setItem('fairlens_resumes', JSON.stringify([newCandidate, ...stored]));
     return newCandidate;
   }
 };
 
 export const fetchAllResumes = async () => {
+  const stored = JSON.parse(localStorage.getItem('fairlens_resumes') || '[]');
   try {
     const response = await axios.get(API_BASE_URL);
     if (response.data.data && response.data.data.length > 0) {
-      return response.data.data;
+      return [...stored, ...response.data.data];
     }
-    return INITIAL_MOCK_CANDIDATES;
-  } catch (error) {
-    return INITIAL_MOCK_CANDIDATES;
+    return [...stored, ...INITIAL_MOCK_CANDIDATES];
+  } catch {
+    return [...stored, ...INITIAL_MOCK_CANDIDATES];
   }
 };
 
@@ -83,7 +93,7 @@ export const updateCandidateEvaluation = async (id, evaluationData) => {
   try {
     const response = await axios.put(`${API_BASE_URL}/${id}/evaluate`, evaluationData);
     return response.data.data;
-  } catch (error) {
+  } catch {
     return { id, ...evaluationData };
   }
 };

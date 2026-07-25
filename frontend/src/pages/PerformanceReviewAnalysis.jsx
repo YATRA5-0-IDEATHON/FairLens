@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FileCheck2, AlertTriangle, CheckCircle2, MessageSquare, Search } from 'lucide-react';
+import { useState } from 'react';
+import { FileCheck2, AlertTriangle } from 'lucide-react';
 
 export default function PerformanceReviewAnalysis() {
   const [sampleText, setSampleText] = useState(

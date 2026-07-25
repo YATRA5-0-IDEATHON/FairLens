@@ -1,5 +1,4 @@
-import React from 'react';
-import { TrendingUp, Clock, AlertTriangle, CheckCircle2, Award } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 export default function PromotionAnalytics() {
   return (

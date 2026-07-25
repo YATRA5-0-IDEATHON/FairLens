@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function EqualityScoreRing({ score = 84, size = 180, strokeWidth = 14, label = "Overall Equality Index" }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;

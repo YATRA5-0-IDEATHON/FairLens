@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ShieldAlert, Lock, MessageSquare, Paperclip, CheckCircle2, Clock, AlertTriangle, Send } from 'lucide-react';
+import { useState } from 'react';
+import { ShieldAlert, Lock, Paperclip, Send } from 'lucide-react';
 
 export default function HarassmentReportingDashboard() {
   const [selectedCase, setSelectedCase] = useState({

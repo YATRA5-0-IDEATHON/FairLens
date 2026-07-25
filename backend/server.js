@@ -11,13 +11,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Path to single canonical dataset folder
 const DATASET_DIR = path.join(__dirname, '..', 'dataset');
 const EMPLOYEES_FILE = path.join(DATASET_DIR, 'employees.json');
 const BIAS_ALERTS_FILE = path.join(DATASET_DIR, 'bias_alerts.json');
 const SAFETY_REPORTS_FILE = path.join(DATASET_DIR, 'safety_reports.json');
+const CANDIDATES_FILE = path.join(DATASET_DIR, 'candidates.json');
 
 // Helper functions to read/write JSON files safely
 const readJSON = (filePath) => {
@@ -103,6 +104,86 @@ app.delete('/api/bias-alerts/:id', (req, res) => {
 app.get('/api/safety-reports', (req, res) => {
   const reports = readJSON(SAFETY_REPORTS_FILE);
   res.json(reports);
+});
+
+const anonymizeResume = (rawText = '', structuredData = {}) => {
+  let text = rawText;
+  const redactedDetails = [];
+  const redact = (pattern, replacement, type) => {
+    const matches = text.match(pattern) || [];
+    if (matches.length) {
+      text = text.replace(pattern, replacement);
+      redactedDetails.push({ type, count: matches.length });
+    }
+  };
+
+  redact(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[REDACTED EMAIL]', 'Email');
+  redact(/(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)|\d{2,4})[\s.-]\d{3,4}[\s.-]\d{3,4}/g, '[REDACTED PHONE]', 'Phone');
+  redact(/https?:\/\/\S+|\b(?:linkedin|github)\.com\/\S+/gi, '[REDACTED URL]', 'Profile URL');
+  if (structuredData.candidateName) {
+    structuredData.candidateName.split(/\s+/).filter((part) => part.length > 1).forEach((part) => {
+      redact(new RegExp(`\\b${part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), '[REDACTED NAME]', 'Name');
+    });
+  }
+  redact(/\b(?:he|she|him|her|his|hers|male|female|mr|mrs|ms)\b/gi, '[REDACTED DEMOGRAPHIC]', 'Demographic');
+  return {
+    anonymizedText: text,
+    redactedDetails,
+    redactedCount: redactedDetails.reduce((total, item) => total + item.count, 0),
+  };
+};
+
+app.get('/api/resumes', (req, res) => {
+  res.json({ success: true, data: readJSON(CANDIDATES_FILE) });
+});
+
+app.post('/api/resumes/upload', (req, res) => {
+  const { rawText, jobTitle, structuredData = {} } = req.body;
+  if (!rawText?.trim()) return res.status(400).json({ error: 'Resume text is required.' });
+
+  const candidates = readJSON(CANDIDATES_FILE);
+  const anonymous = anonymizeResume(rawText, structuredData);
+  const candidateCode = `CAND-${Date.now().toString().slice(-6)}`;
+  const safeIntelligence = structuredData.intelligence
+    ? { ...structuredData.intelligence, rawText: undefined }
+    : undefined;
+  const candidate = {
+    _id: candidateCode,
+    id: candidateCode,
+    candidateCode,
+    jobTitle: jobTitle || 'Unspecified role',
+    appliedRole: jobTitle || 'Unspecified role',
+    appliedDate: new Date().toISOString().slice(0, 10),
+    status: 'New',
+    createdAt: new Date().toISOString(),
+    ...structuredData,
+    intelligence: safeIntelligence,
+    candidateName: undefined,
+    candidateEmail: undefined,
+    rawText: undefined,
+    ...anonymous,
+  };
+  candidates.unshift(candidate);
+  if (!writeJSON(CANDIDATES_FILE, candidates)) {
+    return res.status(500).json({ error: 'Could not save the processed resume.' });
+  }
+  return res.status(201).json({ success: true, data: candidate });
+});
+
+app.put('/api/resumes/:id/evaluate', (req, res) => {
+  const candidates = readJSON(CANDIDATES_FILE);
+  const index = candidates.findIndex((item) => item._id === req.params.id || item.id === req.params.id);
+  if (index < 0) return res.status(404).json({ error: 'Candidate not found.' });
+  candidates[index] = {
+    ...candidates[index],
+    status: req.body.status || candidates[index].status,
+    evaluationNotes: req.body.evaluationNotes ?? candidates[index].evaluationNotes,
+    evaluatedAt: new Date().toISOString(),
+  };
+  if (!writeJSON(CANDIDATES_FILE, candidates)) {
+    return res.status(500).json({ error: 'Could not save the evaluation.' });
+  }
+  return res.json({ success: true, data: candidates[index] });
 });
 
 app.listen(PORT, () => {

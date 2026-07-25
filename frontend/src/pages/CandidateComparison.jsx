@@ -1,5 +1,4 @@
-import React from 'react';
-import { Users, Award, ShieldCheck, CheckCircle, FileText, ArrowRight } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function CandidateComparison() {

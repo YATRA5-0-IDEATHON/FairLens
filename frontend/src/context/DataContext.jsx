@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 // Import initial JSON datasets (single canonical dataset via symlink)
 import initialEmployees from '../dataset/employees.json';
 import initialBiasAlerts from '../dataset/bias_alerts.json';
 import initialSafetyReports from '../dataset/safety_reports.json';
+import initialCandidates from '../dataset/candidates.json';
 
 const API_BASE = 'http://localhost:5000/api';
 
@@ -35,6 +36,14 @@ export function DataProvider({ children }) {
     return initialSafetyReports;
   });
 
+  const [candidates, setCandidates] = useState(() => {
+    const saved = localStorage.getItem('fairlens_candidates');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return initialCandidates;
+  });
+
   const [selectedDeptFilter, setSelectedDeptFilter] = useState('All');
 
   // Sync to localStorage whenever state changes
@@ -50,6 +59,10 @@ export function DataProvider({ children }) {
     localStorage.setItem('fairlens_safety_reports', JSON.stringify(safetyReports));
   }, [safetyReports]);
 
+  useEffect(() => {
+    localStorage.setItem('fairlens_candidates', JSON.stringify(candidates));
+  }, [candidates]);
+
   // Fetch live dataset from backend API on mount
   useEffect(() => {
     fetch(`${API_BASE}/employees`)
@@ -60,6 +73,15 @@ export function DataProvider({ children }) {
         }
       })
       .catch(err => console.log('Backend API offline, using local file dataset:', err));
+
+    fetch(`${API_BASE}/candidates`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCandidates(data);
+        }
+      })
+      .catch(err => console.log('Backend API offline, using local candidate dataset:', err));
   }, []);
 
   // Filtered employees by department
@@ -179,13 +201,75 @@ export function DataProvider({ children }) {
     } catch (err) { console.log(err); }
   };
 
+  // Add a new candidate application (writes to React state, localStorage, and disk JSON via API)
+  const addCandidate = async (newCand) => {
+    const idNum = Math.floor(100 + Math.random() * 900);
+    const formatted = {
+      id: `CAN-${idNum}`,
+      name: newCand.name || 'Anonymous Applicant',
+      email: newCand.email || 'applicant@domain.com',
+      phone: newCand.phone || '',
+      location: newCand.location || 'Remote',
+      appliedRole: newCand.appliedRole || 'Senior Staff Engineer',
+      appliedDate: new Date().toISOString().split('T')[0],
+      gender: newCand.gender || 'Unspecified',
+      summary: newCand.summary || 'Candidate application submitted via public portal.',
+      resumeText: newCand.resumeText || newCand.summary || '',
+      experienceYears: Number(newCand.experienceYears || 0),
+      skills: newCand.skills && newCand.skills.length ? newCand.skills : ['Software Engineering', 'Problem Solving'],
+      experience: newCand.experience || [
+        {
+          title: newCand.appliedRole || 'Software Engineer',
+          company: 'Previous Tech Enterprise',
+          period: '2021 – Present',
+          highlights: [
+            'Architected high-throughput services and user interface components.',
+            'Consistently delivered sprint features on schedule with high reliability.',
+          ],
+        },
+      ],
+      education: newCand.education || {
+        degree: 'B.S. in Computer Science',
+        gradYear: newCand.gradYear || '2020',
+      },
+      meritScore: Number.isFinite(newCand.meritScore) ? Math.round(newCand.meritScore) : Math.floor(88 + Math.random() * 10),
+      status: 'Pending Review',
+    };
+
+    setCandidates(prev => [formatted, ...prev]);
+
+    try {
+      await fetch(`${API_BASE}/candidates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formatted),
+      });
+    } catch (err) { console.log('Error writing candidate to disk JSON server:', err); }
+
+    return formatted;
+  };
+
+  // Update a candidate's screening status (Shortlisted / Declined / Pending Review)
+  const updateCandidateStatus = async (candId, status) => {
+    setCandidates(prev => prev.map(c => (c.id === candId ? { ...c, status } : c)));
+    try {
+      await fetch(`${API_BASE}/candidates/${candId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+    } catch (err) { console.log('Error updating candidate status on disk JSON server:', err); }
+  };
+
   const resetToJSONFile = () => {
     localStorage.removeItem('fairlens_employees');
     localStorage.removeItem('fairlens_bias_alerts');
     localStorage.removeItem('fairlens_safety_reports');
+    localStorage.removeItem('fairlens_candidates');
     setEmployees(initialEmployees);
     setBiasAlerts(initialBiasAlerts);
     setSafetyReports(initialSafetyReports);
+    setCandidates(initialCandidates);
   };
 
   return (
@@ -194,6 +278,7 @@ export function DataProvider({ children }) {
       filteredEmployees,
       biasAlerts,
       safetyReports,
+      candidates,
       genderStats,
       payGapStats,
       overallEqualityScore,
@@ -201,6 +286,8 @@ export function DataProvider({ children }) {
       setSelectedDeptFilter,
       addEmployee,
       updateEmployeeSalary,
+      addCandidate,
+      updateCandidateStatus,
       dismissBiasAlert,
       resetToJSONFile
     }}>
@@ -209,6 +296,8 @@ export function DataProvider({ children }) {
   );
 }
 
+// This hook intentionally shares the context module with its provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useData() {
   return useContext(DataContext);
 }

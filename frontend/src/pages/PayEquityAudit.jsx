@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { DollarSign, AlertTriangle, Calculator, ShieldCheck, ArrowRight, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { DollarSign, Calculator, ArrowRight } from 'lucide-react';
 
 export default function PayEquityAudit() {
   const [remediationTarget, setRemediationTarget] = useState(100);
