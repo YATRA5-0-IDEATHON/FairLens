@@ -11,14 +11,23 @@ export default function PeopleOperations() {
   const [query, setQuery] = useState('');
   const [auditLogs, setAuditLogs] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
+  const [branchFilter, setBranchFilter] = useState('All branches');
+  const [employeeSort, setEmployeeSort] = useState('name');
 
   useEffect(() => {
     fetch(`${API_BASE}/audit-logs?limit=100`).then(response => response.json()).then(setAuditLogs).catch(() => setAuditLogs([]));
   }, []);
 
-  const filteredEmployees = useMemo(() => employees.filter(employee =>
-    `${employee.name} ${employee.department} ${employee.role || employee.position}`.toLowerCase().includes(query.toLowerCase())
-  ), [employees, query]);
+  const branches = useMemo(() => ['All branches', ...new Set(employees.map(employee => employee.branch || employee.department).filter(Boolean))], [employees]);
+  const filteredEmployees = useMemo(() => employees
+    .filter(employee => branchFilter === 'All branches' || (employee.branch || employee.department) === branchFilter)
+    .filter(employee => `${employee.name} ${employee.branch || employee.department} ${employee.role || employee.position}`.toLowerCase().includes(query.toLowerCase()))
+    .sort((a, b) => {
+      if (employeeSort === 'branch') return String(a.branch || a.department || '').localeCompare(String(b.branch || b.department || ''));
+      if (employeeSort === 'performance') return (b.performanceRating || 0) - (a.performanceRating || 0);
+      if (employeeSort === 'salary') return (b.salary || 0) - (a.salary || 0);
+      return String(a.name || '').localeCompare(String(b.name || ''));
+    }), [employees, query, branchFilter, employeeSort]);
   const filteredCandidates = useMemo(() => candidates.filter(candidate =>
     (statusFilter === 'All' || candidate.status === statusFilter)
     && `${candidate.id} ${candidate.appliedRole} ${candidate.status}`.toLowerCase().includes(query.toLowerCase())
@@ -38,9 +47,17 @@ export default function PeopleOperations() {
       <nav className="operations-tabs">
         {[['people', Users, 'Employees'], ['pipeline', Filter, 'Hiring pipeline'], ['jobs', BriefcaseBusiness, 'Job demand'], ['audit', ShieldCheck, 'Audit log']].map(([id, Icon, label]) => <button key={id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}><Icon size={15} />{label}</button>)}
       </nav>
-      <div className="operations-toolbar"><label><Search size={15} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search this view…" /></label>{tab === 'pipeline' && <select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option>All</option><option>Pending Review</option><option>Shortlisted</option><option>Hired</option><option>Declined</option></select>}<span>{tab === 'people' ? filteredEmployees.length : tab === 'pipeline' ? filteredCandidates.length : tab === 'jobs' ? jobs.length : auditLogs.length} records</span></div>
+      <div className="operations-toolbar">
+        <label><Search size={15} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search this view…" /></label>
+        {tab === 'people' && <>
+          <select value={branchFilter} onChange={event => setBranchFilter(event.target.value)}>{branches.map(branch => <option key={branch}>{branch}</option>)}</select>
+          <select value={employeeSort} onChange={event => setEmployeeSort(event.target.value)}><option value="name">Sort: Name</option><option value="branch">Sort: Branch</option><option value="performance">Sort: Performance</option><option value="salary">Sort: Salary</option></select>
+        </>}
+        {tab === 'pipeline' && <select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option>All</option><option>Pending Review</option><option>Shortlisted</option><option>Hired</option><option>Declined</option></select>}
+        <span>{tab === 'people' ? filteredEmployees.length : tab === 'pipeline' ? filteredCandidates.length : tab === 'jobs' ? jobs.length : auditLogs.length} records</span>
+      </div>
       <motion.section className="operations-table" key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        {tab === 'people' && <><TableHead labels={['Employee', 'Department', 'Role', 'Performance', 'Status']} />{filteredEmployees.map(employee => <div className="operations-row" key={employee.id}><Identity title={employee.name} subtitle={employee.id} /><span>{employee.department || 'Unassigned'}</span><span>{employee.role || employee.position || 'Not specified'}</span><span>{employee.performanceRating ? `${employee.performanceRating}/5` : 'Not reviewed'}</span><Status value={employee.status || 'Active'} /></div>)}</>}
+        {tab === 'people' && <><TableHead labels={['Employee', 'Branch / department', 'Role', 'Performance', 'Status']} />{filteredEmployees.map(employee => <div className="operations-row" key={employee.id}><Identity title={employee.name} subtitle={employee.id} /><span>{employee.branch || employee.department || 'Unassigned'}</span><span>{employee.role || employee.position || 'Not specified'}</span><span>{employee.performanceRating ? `${employee.performanceRating}/5` : 'Not reviewed'}</span><Status value={employee.status || 'Active'} /></div>)}</>}
         {tab === 'pipeline' && <><TableHead labels={['Candidate', 'Role', 'Applied', 'Status', 'Decision']} />{filteredCandidates.map(candidate => <div className="operations-row" key={candidate.id}><Identity title={candidate.id} subtitle="Identity protected" /><span>{candidate.appliedRole}</span><span>{candidate.appliedDate || 'Not recorded'}</span><Status value={candidate.status} /><select value={candidate.status} onChange={event => updateCandidateStatus(candidate.id, event.target.value)}><option>Pending Review</option><option>Shortlisted</option><option>Hired</option><option>Declined</option></select></div>)}</>}
         {tab === 'jobs' && <><TableHead labels={['Role', 'Applications', 'Shortlisted', 'Hired', 'Conversion']} />{jobs.map(job => <div className="operations-row" key={job.role}><Identity title={job.role} subtitle="Active candidate demand" /><span>{job.applications}</span><span>{job.shortlisted}</span><span>{job.hired}</span><span>{job.applications ? Math.round(job.hired / job.applications * 100) : 0}%</span></div>)}</>}
         {tab === 'audit' && <><TableHead labels={['Activity', 'Entity', 'Actor', 'Time', 'Details']} />{auditLogs.map(log => <div className="operations-row" key={log.id}><Identity title={log.action} subtitle={log.id} /><span>{log.entityType} · {log.entityId}</span><span>{log.actor}</span><span>{new Date(log.timestamp).toLocaleString()}</span><span className="audit-fields">{log.details?.fields?.join(', ') || log.details?.role || 'Recorded'}</span></div>)}</>}

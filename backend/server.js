@@ -137,6 +137,37 @@ app.get('/api/resumes', (req, res) => {
   res.json({ success: true, data: readJSON(CANDIDATES_FILE) });
 });
 
+// Shared candidate endpoints used by screening, comparison, and people operations.
+app.get('/api/candidates', (req, res) => {
+  res.json(readJSON(CANDIDATES_FILE));
+});
+
+app.post('/api/candidates', (req, res) => {
+  const candidates = readJSON(CANDIDATES_FILE);
+  const candidate = {
+    ...req.body,
+    id: req.body.id || `CAN-${Date.now().toString().slice(-6)}`,
+    appliedDate: req.body.appliedDate || new Date().toISOString().slice(0, 10),
+    status: req.body.status || 'Pending Review',
+  };
+  candidates.unshift(candidate);
+  if (!writeJSON(CANDIDATES_FILE, candidates)) {
+    return res.status(500).json({ error: 'Could not save candidate.' });
+  }
+  return res.status(201).json(candidate);
+});
+
+app.put('/api/candidates/:id', (req, res) => {
+  const candidates = readJSON(CANDIDATES_FILE);
+  const index = candidates.findIndex(candidate => candidate.id === req.params.id || candidate._id === req.params.id);
+  if (index < 0) return res.status(404).json({ error: 'Candidate not found.' });
+  candidates[index] = { ...candidates[index], ...req.body, updatedAt: new Date().toISOString() };
+  if (!writeJSON(CANDIDATES_FILE, candidates)) {
+    return res.status(500).json({ error: 'Could not update candidate.' });
+  }
+  return res.json(candidates[index]);
+});
+
 app.post('/api/resumes/upload', (req, res) => {
   const { rawText, jobTitle, structuredData = {} } = req.body;
   if (!rawText?.trim()) return res.status(400).json({ error: 'Resume text is required.' });
