@@ -82,6 +82,15 @@ export function DataProvider({ children }) {
         }
       })
       .catch(err => console.log('Backend API offline, using local candidate dataset:', err));
+
+    fetch(`${API_BASE}/safety-reports`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setSafetyReports(data);
+        }
+      })
+      .catch(err => console.log('Backend API offline, using local safety reports dataset:', err));
   }, []);
 
   // Filtered employees by department

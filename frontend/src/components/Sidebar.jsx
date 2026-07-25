@@ -7,7 +7,6 @@ import {
   DollarSign, 
   TrendingUp, 
   ShieldAlert, 
-  Lock, 
   FileSpreadsheet, 
   Settings as SettingsIcon
 } from 'lucide-react';
@@ -59,10 +58,6 @@ export default function Sidebar() {
         <NavLink to="/harassment-dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <ShieldAlert size={18} />
           <span>Safety Dashboard</span>
-        </NavLink>
-        <NavLink to="/employee-portal" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Lock size={18} />
-          <span>Anonymous Portal</span>
         </NavLink>
         <NavLink to="/compliance-reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <FileSpreadsheet size={18} />

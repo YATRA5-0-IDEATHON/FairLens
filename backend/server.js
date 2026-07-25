@@ -3,6 +3,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { anonymizeResume } from './src/utils/anonymizer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,14 +12,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '50mb' })); // increased limit for base64 evidence uploads
 
 // Path to single canonical dataset folder
 const DATASET_DIR = path.join(__dirname, '..', 'dataset');
 const EMPLOYEES_FILE = path.join(DATASET_DIR, 'employees.json');
 const BIAS_ALERTS_FILE = path.join(DATASET_DIR, 'bias_alerts.json');
 const SAFETY_REPORTS_FILE = path.join(DATASET_DIR, 'safety_reports.json');
-const CANDIDATES_FILE = path.join(DATASET_DIR, 'candidates.json');
+const RESUMES_FILE = path.join(DATASET_DIR, 'resumes.json');
 
 // Helper functions to read/write JSON files safely
 const readJSON = (filePath) => {
@@ -100,121 +101,158 @@ app.delete('/api/bias-alerts/:id', (req, res) => {
   res.json({ success: true, alerts });
 });
 
-// GET Safety Reports
+// GET Safety Reports (HR view — all cases)
 app.get('/api/safety-reports', (req, res) => {
   const reports = readJSON(SAFETY_REPORTS_FILE);
   res.json(reports);
 });
 
-const anonymizeResume = (rawText = '', structuredData = {}) => {
-  let text = rawText;
-  const redactedDetails = [];
-  const redact = (pattern, replacement, type) => {
-    const matches = text.match(pattern) || [];
-    if (matches.length) {
-      text = text.replace(pattern, replacement);
-      redactedDetails.push({ type, count: matches.length });
-    }
+// POST New Safety Report (employee submits anonymously — generates a passkey,
+// the only link back to this case. No employee identity is stored.)
+app.post('/api/safety-reports', (req, res) => {
+  const { category, narrative, severity, evidenceFiles } = req.body;
+  if (!category || !narrative) {
+    return res.status(400).json({ success: false, error: 'category and narrative are required' });
+  }
+
+  const reports = readJSON(SAFETY_REPORTS_FILE);
+  const passkey = 'FL-PASSKEY-' + Math.random().toString(36).substring(2, 10).toUpperCase() +
+    '-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+  const newReport = {
+    id: `SAFE-${Math.floor(100 + Math.random() * 900)}`,
+    passkey,
+    category,
+    severity: severity || 'Standard',
+    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    status: 'Pending Review',
+    narrative,
+    evidenceFiles: Array.isArray(evidenceFiles) ? evidenceFiles.map(f => ({
+      name: f.name,
+      type: f.type,
+      size: f.size,
+      data: f.data // base64 data URL
+    })) : [],
+    chatHistory: [
+      { sender: 'System', text: 'Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.', time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }
+    ]
   };
 
-  redact(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[REDACTED EMAIL]', 'Email');
-  redact(/(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)|\d{2,4})[\s.-]\d{3,4}[\s.-]\d{3,4}/g, '[REDACTED PHONE]', 'Phone');
-  redact(/https?:\/\/\S+|\b(?:linkedin|github)\.com\/\S+/gi, '[REDACTED URL]', 'Profile URL');
-  if (structuredData.candidateName) {
-    structuredData.candidateName.split(/\s+/).filter((part) => part.length > 1).forEach((part) => {
-      redact(new RegExp(`\\b${part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), '[REDACTED NAME]', 'Name');
-    });
+  reports.unshift(newReport);
+  writeJSON(SAFETY_REPORTS_FILE, reports);
+
+  // Only the passkey and case id go back to the employee — never the full list.
+  res.status(201).json({ success: true, id: newReport.id, passkey: newReport.passkey });
+});
+
+// GET Single Case by Passkey (anonymous employee-side lookup — no auth, no identity)
+app.get('/api/safety-reports/lookup/:passkey', (req, res) => {
+  const reports = readJSON(SAFETY_REPORTS_FILE);
+  const report = reports.find(r => r.passkey === req.params.passkey);
+  if (!report) {
+    return res.status(404).json({ success: false, error: 'No case found for this passkey' });
   }
-  redact(/\b(?:he|she|him|her|his|hers|male|female|mr|mrs|ms)\b/gi, '[REDACTED DEMOGRAPHIC]', 'Demographic');
-  return {
-    anonymizedText: text,
-    redactedDetails,
-    redactedCount: redactedDetails.reduce((total, item) => total + item.count, 0),
-  };
-};
-
-app.get('/api/resumes', (req, res) => {
-  res.json({ success: true, data: readJSON(CANDIDATES_FILE) });
+  res.json({ success: true, data: report });
 });
 
-// Shared candidate endpoints used by screening, comparison, and people operations.
-app.get('/api/candidates', (req, res) => {
-  res.json(readJSON(CANDIDATES_FILE));
-});
-
-app.post('/api/candidates', (req, res) => {
-  const candidates = readJSON(CANDIDATES_FILE);
-  const candidate = {
-    ...req.body,
-    id: req.body.id || `CAN-${Date.now().toString().slice(-6)}`,
-    appliedDate: req.body.appliedDate || new Date().toISOString().slice(0, 10),
-    status: req.body.status || 'Pending Review',
-  };
-  candidates.unshift(candidate);
-  if (!writeJSON(CANDIDATES_FILE, candidates)) {
-    return res.status(500).json({ error: 'Could not save candidate.' });
+// POST Chat Message (used by both HR dashboard and the anonymous employee passkey view)
+app.post('/api/safety-reports/:id/chat', (req, res) => {
+  const { sender, text } = req.body;
+  if (!sender || !text || !text.trim()) {
+    return res.status(400).json({ success: false, error: 'sender and text are required' });
   }
-  return res.status(201).json(candidate);
-});
-
-app.put('/api/candidates/:id', (req, res) => {
-  const candidates = readJSON(CANDIDATES_FILE);
-  const index = candidates.findIndex(candidate => candidate.id === req.params.id || candidate._id === req.params.id);
-  if (index < 0) return res.status(404).json({ error: 'Candidate not found.' });
-  candidates[index] = { ...candidates[index], ...req.body, updatedAt: new Date().toISOString() };
-  if (!writeJSON(CANDIDATES_FILE, candidates)) {
-    return res.status(500).json({ error: 'Could not update candidate.' });
+  if (!['HR Officer', 'Anonymous Employee'].includes(sender)) {
+    return res.status(400).json({ success: false, error: 'Invalid sender' });
   }
-  return res.json(candidates[index]);
+
+  const reports = readJSON(SAFETY_REPORTS_FILE);
+  const index = reports.findIndex(r => r.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ success: false, error: 'Case not found' });
+  }
+
+  const message = { sender, text: text.trim(), time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) };
+  reports[index].chatHistory.push(message);
+  writeJSON(SAFETY_REPORTS_FILE, reports);
+  res.json({ success: true, data: reports[index] });
 });
 
+// PUT Update Case Status (HR-side case management — Pending Review -> Under Investigation -> Resolved)
+app.put('/api/safety-reports/:id', (req, res) => {
+  const reports = readJSON(SAFETY_REPORTS_FILE);
+  const index = reports.findIndex(r => r.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ success: false, error: 'Case not found' });
+  }
+  reports[index] = { ...reports[index], ...req.body };
+  writeJSON(SAFETY_REPORTS_FILE, reports);
+  res.json({ success: true, data: reports[index] });
+});
+
+// POST Preview Anonymization (no save — used for live preview before upload)
+app.post('/api/resumes/preview', (req, res) => {
+  const { rawText } = req.body;
+  if (!rawText) {
+    return res.status(400).json({ success: false, error: 'rawText is required' });
+  }
+  const result = anonymizeResume(rawText);
+  res.json({ success: true, data: result });
+});
+
+// POST Upload Resume (anonymizes and persists to dataset/resumes.json)
 app.post('/api/resumes/upload', (req, res) => {
-  const { rawText, jobTitle, structuredData = {} } = req.body;
-  if (!rawText?.trim()) return res.status(400).json({ error: 'Resume text is required.' });
-
-  const candidates = readJSON(CANDIDATES_FILE);
-  const anonymous = anonymizeResume(rawText, structuredData);
-  const candidateCode = `CAND-${Date.now().toString().slice(-6)}`;
-  const safeIntelligence = structuredData.intelligence
-    ? { ...structuredData.intelligence, rawText: undefined }
-    : undefined;
-  const candidate = {
-    _id: candidateCode,
-    id: candidateCode,
-    candidateCode,
-    jobTitle: jobTitle || 'Unspecified role',
-    appliedRole: jobTitle || 'Unspecified role',
-    appliedDate: new Date().toISOString().slice(0, 10),
-    status: 'New',
-    createdAt: new Date().toISOString(),
-    ...structuredData,
-    intelligence: safeIntelligence,
-    candidateName: undefined,
-    candidateEmail: undefined,
-    rawText: undefined,
-    ...anonymous,
-  };
-  candidates.unshift(candidate);
-  if (!writeJSON(CANDIDATES_FILE, candidates)) {
-    return res.status(500).json({ error: 'Could not save the processed resume.' });
+  const { rawText, jobTitle } = req.body;
+  if (!rawText) {
+    return res.status(400).json({ success: false, error: 'rawText is required' });
   }
-  return res.status(201).json({ success: true, data: candidate });
+
+  const anonymized = anonymizeResume(rawText);
+  const resumes = readJSON(RESUMES_FILE);
+
+  const newCandidate = {
+    _id: `CAND-${Date.now()}`,
+    candidateCode: `CAND-${Math.floor(1000 + Math.random() * 9000)}`,
+    jobTitle: jobTitle || 'Unspecified Role',
+    anonymizedText: anonymized.anonymizedText,
+    redactedCount: anonymized.redactedCount,
+    redactedDetails: anonymized.redactedDetails,
+    extractedSkills: anonymized.extractedSkills,
+    yearsOfExperience: anonymized.yearsOfExperience,
+    rating: 0,
+    evaluationNotes: '',
+    status: 'New',
+    createdAt: new Date().toISOString()
+  };
+
+  resumes.unshift(newCandidate);
+  const success = writeJSON(RESUMES_FILE, resumes);
+
+  if (success) {
+    res.status(201).json({ success: true, data: newCandidate });
+  } else {
+    res.status(500).json({ success: false, error: 'Failed to write to resumes.json' });
+  }
 });
 
+// GET All Resumes (HR-facing anonymized candidate list)
+app.get('/api/resumes', (req, res) => {
+  const resumes = readJSON(RESUMES_FILE);
+  res.json({ success: true, data: resumes });
+});
+
+// PUT Update Candidate Evaluation (rating, notes, status — set by HR after blind review)
 app.put('/api/resumes/:id/evaluate', (req, res) => {
-  const candidates = readJSON(CANDIDATES_FILE);
-  const index = candidates.findIndex((item) => item._id === req.params.id || item.id === req.params.id);
-  if (index < 0) return res.status(404).json({ error: 'Candidate not found.' });
-  candidates[index] = {
-    ...candidates[index],
-    status: req.body.status || candidates[index].status,
-    evaluationNotes: req.body.evaluationNotes ?? candidates[index].evaluationNotes,
-    evaluatedAt: new Date().toISOString(),
-  };
-  if (!writeJSON(CANDIDATES_FILE, candidates)) {
-    return res.status(500).json({ error: 'Could not save the evaluation.' });
+  const { id } = req.params;
+  const resumes = readJSON(RESUMES_FILE);
+
+  const index = resumes.findIndex(r => r._id === id);
+  if (index === -1) {
+    return res.status(404).json({ success: false, error: 'Candidate not found' });
   }
-  return res.json({ success: true, data: candidates[index] });
+
+  resumes[index] = { ...resumes[index], ...req.body };
+  writeJSON(RESUMES_FILE, resumes);
+  res.json({ success: true, data: resumes[index] });
 });
 
 app.listen(PORT, () => {
