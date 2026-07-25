@@ -1,5 +1,18 @@
 [
   {
+    "name": "soham",
+    "gender": "Non-Binary",
+    "department": "Sales & Marketing",
+    "role": "Sales ",
+    "salary": 150000,
+    "level": "L4",
+    "experienceYears": 5,
+    "monthsInRole": 14,
+    "id": "EMP-724",
+    "status": "Active",
+    "performanceRating": 4.5
+  },
+  {
     "name": "anjila Basnet",
     "gender": "Female",
     "department": "Engineering & Ops",
