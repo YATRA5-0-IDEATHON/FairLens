@@ -1,415 +1,210 @@
-import { useState } from 'react';
-import { useData } from '../context/DataContext';
-import EqualityScoreRing from '../components/EqualityScoreRing';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  AlertTriangle,
-  ShieldAlert,
-  PlusCircle,
-  CheckCircle2,
-  Filter,
-  X,
-  Edit2,
-  RotateCcw,
+  AlertTriangle, ArrowRight, CheckCircle2, FileSpreadsheet,
+  FileUp, ShieldAlert, TrendingUp, Users,
 } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 export default function HRDashboard() {
-  const {
-    filteredEmployees,
-    genderStats,
-    payGapStats,
-    overallEqualityScore,
-    biasAlerts,
-    safetyReports,
-    selectedDeptFilter,
-    setSelectedDeptFilter,
-    addEmployee,
-    updateEmployeeSalary,
-    dismissBiasAlert,
-    resetToJSONFile,
-  } = useData();
-
-  // State for Add Employee Modal
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newEmpName, setNewEmpName] = useState('');
-  const [newEmpGender, setNewEmpGender] = useState('Female');
-  const [newEmpDept, setNewEmpDept] = useState('Engineering & Ops');
-  const [newEmpRole, setNewEmpRole] = useState('Senior Software Engineer');
-  const [newEmpSalary, setNewEmpSalary] = useState(160000);
-
-  // State for Editing Employee Salary
-  const [editingEmpId, setEditingEmpId] = useState(null);
-  const [editSalaryValue, setEditSalaryValue] = useState(160000);
-
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    if (!newEmpName) return;
-    await addEmployee({
-      name: newEmpName,
-      gender: newEmpGender,
-      department: newEmpDept,
-      role: newEmpRole,
-      salary: newEmpSalary,
-      level: 'L4',
-      experienceYears: 5,
-      monthsInRole: 14
-    });
-    setNewEmpName('');
-    setShowAddModal(false);
-  };
-
-  const handleSalarySave = async (id) => {
-    await updateEmployeeSalary(id, editSalaryValue);
-    setEditingEmpId(null);
-  };
-
-  const openCasesCount = safetyReports.filter(r => r.status !== 'Resolved').length;
+  const { employees, candidates, biasAlerts, safetyReports, overallEqualityScore } = useData();
+  const brief = useMemo(
+    () => buildBrief(employees, candidates, biasAlerts, safetyReports, overallEqualityScore),
+    [employees, candidates, biasAlerts, safetyReports, overallEqualityScore],
+  );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* Top Banner Header with Interactive Filter & Add Employee Button */}
-      <div className="page-header">
+    <div className="work-dashboard">
+      <header className="work-hero">
         <div>
-          <h1 className="page-title">Executive HR & DEI Dashboard</h1>
-          <p className="page-subtitle">Two-way synchronized equality index, pay parity analytics, and dataset engine.</p>
+          <span>HR command center</span>
+          <h1>What needs attention today</h1>
+          <p>One prioritized work queue across hiring, fairness, advancement, and employee safety.</p>
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          {/* Interactive Department Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--surface-white)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-light)' }}>
-            <Filter size={14} color="var(--primary-indigo)" />
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Dept:</span>
-            <select 
-              value={selectedDeptFilter}
-              onChange={(e) => setSelectedDeptFilter(e.target.value)}
-              style={{ border: 'none', background: 'transparent', fontWeight: 600, color: 'var(--primary-indigo)', cursor: 'pointer', outline: 'none' }}
-            >
-              <option value="All">All Departments ({genderStats.total} staff)</option>
-              <option value="Engineering & Ops">Engineering & Ops</option>
-              <option value="Product & Design">Product & Design</option>
-              <option value="Sales & Marketing">Sales & Marketing</option>
-              <option value="Finance & Legal">Finance & Legal</option>
-              <option value="Executive Leadership">Executive Leadership</option>
-            </select>
-          </div>
-
-          <button className="btn btn-teal btn-sm" onClick={() => setShowAddModal(true)}>
-            <PlusCircle size={16} />
-            <span>+ Add Employee</span>
-          </button>
-
-          <button className="btn btn-outline btn-sm" onClick={resetToJSONFile} title="Reload fresh data directly from dataset/employees.json file">
-            <RotateCcw size={14} />
-            <span>Reset to File JSON</span>
-          </button>
+        <div className="health-signal">
+          <div className={`health-dot ${brief.healthTone}`} />
+          <div><strong>{brief.healthLabel}</strong><span>{brief.openActions} open action{brief.openActions === 1 ? '' : 's'}</span></div>
+          <b>{overallEqualityScore}<small>/100</small></b>
         </div>
-      </div>
+      </header>
 
-      {/* Top 4 Reactive KPI Cards */}
-      <div className="grid-4">
-        <div className="card stat-card">
-          <div className="stat-label">Overall Equality Index</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.2rem' }}>
-            <div className="stat-value" style={{ color: 'var(--primary-indigo)' }}>
-              {overallEqualityScore}<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/100</span>
-            </div>
-            <div className="badge badge-teal">Live Synchronized</div>
-          </div>
-          <div className="progress-bar-bg" style={{ marginTop: '0.5rem' }}>
-            <div className="progress-bar-fill" style={{ width: `${overallEqualityScore}%`, background: 'linear-gradient(90deg, #3FA796, #2B2E6B)' }}></div>
-          </div>
-        </div>
+      <section className="today-strip">
+        <div><span>Today’s queue</span><strong>{brief.openActions}</strong><small>items needing an HR decision</small></div>
+        <div><span>Highest priority</span><strong>{brief.urgentCases ? `${brief.urgentCases} urgent case${brief.urgentCases === 1 ? '' : 's'}` : 'No urgent cases'}</strong><small>{brief.urgentCases ? 'Workplace response required' : 'Safety queue is stable'}</small></div>
+        <div><span>Candidate decisions</span><strong>{brief.pendingCandidates}</strong><small>applications awaiting review</small></div>
+        <div><span>Advancement reviews</span><strong>{brief.eligibleEmployees}</strong><small>eligible employees awaiting evaluation</small></div>
+      </section>
 
-        <div className="card stat-card">
-          <div className="stat-label">Unexplained Pay Gap</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.2rem' }}>
-            <div className="stat-value" style={{ color: payGapStats.gapPct > 0 ? 'var(--accent-coral)' : 'var(--secondary-teal)' }}>
-              {payGapStats.gapPct > 0 ? `-${payGapStats.gapPct}%` : `+${Math.abs(payGapStats.gapPct)}%`}
-            </div>
-            <div className={`badge ${payGapStats.isFlagged ? 'badge-coral' : 'badge-teal'}`}>
-              {payGapStats.isFlagged ? 'Flagged' : 'In Range'}
-            </div>
-          </div>
-          <div className="stat-trend negative">
-            <AlertTriangle size={14} />
-            <span>Avg Male: ${payGapStats.maleAvgSalary.toLocaleString()} vs Female: ${payGapStats.femaleAvgSalary.toLocaleString()}</span>
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-label">Active Headcount ({selectedDeptFilter})</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.2rem' }}>
-            <div className="stat-value">{genderStats.total}</div>
-            <div className="badge badge-teal">{genderStats.femalePct}% Female</div>
-          </div>
-          <div className="stat-trend positive">
-            <CheckCircle2 size={14} />
-            <span>Disk File & API Synced</span>
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-label">Open Safety Reports</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.2rem' }}>
-            <div className="stat-value" style={{ color: openCasesCount > 0 ? 'var(--warning-amber)' : 'var(--secondary-teal)' }}>
-              {openCasesCount}
-            </div>
-            <div className={`badge ${openCasesCount > 0 ? 'badge-amber' : 'badge-teal'}`}>
-              {openCasesCount > 0 ? 'Triage Active' : 'All Clear'}
-            </div>
-          </div>
-          <div className="stat-trend neutral">
-            <ShieldAlert size={14} />
-            <span>Zero-Knowledge Encryption</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Grid: Score Ring + Donut & Bias Stream */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
-        {/* Equality Score & Sub-Metric Breakdown */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="card-header">
-            <div>
-              <h3 className="card-title">Live Equality Index Architecture</h3>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Recalculates instantly when JSON dataset or filters change</div>
-            </div>
-            <span className="badge badge-indigo">{selectedDeptFilter} View</span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
-            <EqualityScoreRing score={overallEqualityScore} size={190} label="Equal Index" />
-
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <SubScoreProgress label="Gender Balance Score" score={Math.min(100, Math.max(40, 100 - Math.abs(genderStats.femalePct - 50) * 2))} color="var(--secondary-teal)" />
-              <SubScoreProgress label="Pay Parity Metric" score={Math.min(100, Math.max(40, Math.round(100 - Math.abs(payGapStats.gapPct) * 6)))} color="var(--warning-amber)" />
-              <SubScoreProgress label="Workplace Safety Index" score={Math.max(50, 100 - openCasesCount * 10)} color="var(--secondary-teal)" />
-            </div>
-          </div>
-        </div>
-
-        {/* Gender Distribution Widget */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">Gender Representation Ratio</h3>
-            <span className="badge badge-teal">{genderStats.total} Staff Plotted</span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <GenderRatioBar label="Male" count={genderStats.maleCount} pct={genderStats.malePct} color="#2B2E6B" />
-            <GenderRatioBar label="Female" count={genderStats.femaleCount} pct={genderStats.femalePct} color="#3FA796" />
-            <GenderRatioBar label="Non-Binary" count={genderStats.nbCount} pct={genderStats.nbPct} color="#E6A100" />
-            <GenderRatioBar label="Unspecified" count={genderStats.unspecCount} pct={genderStats.unspecPct} color="#94A3B8" />
-          </div>
-        </div>
-      </div>
-
-      {/* Interactive Employee Dataset Table with Live Salary Editor */}
-      <div className="card">
-        <div className="card-header">
-          <div>
-            <h3 className="card-title">Interactive Employee Dataset</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              Edit salary or add employees below — modifications write directly back to <code>dataset/employees.json</code> on disk!
-            </p>
-          </div>
-          <span className="badge badge-indigo">{filteredEmployees.length} Records Shown</span>
-        </div>
-
-        <div className="data-table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Employee Name</th>
-                <th>Gender</th>
-                <th>Department</th>
-                <th>Role Title</th>
-                <th>Annual Salary</th>
-                <th>Performance</th>
-                <th>Interactive Edit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEmployees.slice(0, 10).map((emp) => (
-                <tr key={emp.id}>
-                  <td className="font-mono" style={{ fontWeight: 'bold' }}>{emp.id}</td>
-                  <td><strong>{emp.name}</strong></td>
-                  <td>
-                    <span className={`badge ${emp.gender === 'Female' ? 'badge-teal' : (emp.gender === 'Male' ? 'badge-indigo' : 'badge-amber')}`}>
-                      {emp.gender}
-                    </span>
-                  </td>
-                  <td>{emp.department}</td>
-                  <td>{emp.role}</td>
-                  <td className="font-mono" style={{ fontWeight: 600 }}>
-                    {editingEmpId === emp.id ? (
-                      <input 
-                        type="number" 
-                        value={editSalaryValue}
-                        onChange={(e) => setEditSalaryValue(Number(e.target.value))}
-                        style={{ width: '100px', padding: '0.2rem 0.4rem', border: '1px solid var(--secondary-teal)', borderRadius: '4px' }}
-                      />
-                    ) : (
-                      `$${emp.salary?.toLocaleString()}`
-                    )}
-                  </td>
-                  <td className="font-mono">{emp.performanceRating} / 5.0</td>
-                  <td>
-                    {editingEmpId === emp.id ? (
-                      <button className="btn btn-teal btn-sm" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleSalarySave(emp.id)}>
-                        Save to Disk
-                      </button>
-                    ) : (
-                      <button className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => { setEditingEmpId(emp.id); setEditSalaryValue(emp.salary); }}>
-                        <Edit2 size={12} /> Edit Salary
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Active Bias Alerts Stream */}
-      <div className="card">
-        <div className="card-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertTriangle size={18} color="var(--accent-coral)" />
-            <h3 className="card-title">Active AI Bias Alert Feed ({biasAlerts.length})</h3>
-          </div>
-          <span className="badge badge-coral">Real-Time Detection</span>
-        </div>
-
-        <div className="grid-3">
-          {biasAlerts.map((alert) => (
-            <div key={alert.id} style={{ padding: '1rem', borderLeft: '4px solid var(--accent-coral)', background: 'var(--accent-coral-light)', borderRadius: '0 8px 8px 0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.9rem' }}>
-                  <span>{alert.title}</span>
-                  <span className="font-mono" style={{ color: 'var(--accent-coral)' }}>{alert.metric}</span>
-                </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.3rem', lineHeight: 1.4 }}>
-                  {alert.description}
-                </p>
+      <main className="work-layout">
+        <section className="work-queue">
+          <div className="section-heading"><div><span>Prioritized automatically</span><h2>Action queue</h2></div><small>Critical items first</small></div>
+          {brief.tasks.map((task, index) => (
+            <article className={`work-item ${task.tone}`} key={task.title}>
+              <div className="work-rank">{String(index + 1).padStart(2, '0')}</div>
+              <i>{task.icon}</i>
+              <div className="work-copy">
+                <div><span>{task.area}</span><b>{task.priority}</b></div>
+                <h3>{task.title}</h3>
+                <p>{task.detail}</p>
+                <small>{task.evidence}</small>
               </div>
-              <div style={{ marginTop: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="badge badge-coral" style={{ fontSize: '0.65rem' }}>{alert.department}</span>
-                <button className="btn btn-outline btn-sm" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }} onClick={() => dismissBiasAlert(alert.id)}>
-                  Dismiss Flag
-                </button>
-              </div>
-            </div>
+              <Link to={task.to}>{task.action}<ArrowRight size={15} /></Link>
+            </article>
           ))}
-        </div>
-      </div>
+          {!brief.tasks.length && <div className="queue-clear"><CheckCircle2 size={24} /><div><strong>No immediate action required</strong><span>Current fairness and safety records are within review thresholds.</span></div></div>}
+        </section>
 
-      {/* Add Employee Modal */}
-      {showAddModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(30, 31, 38, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
-          <div className="card" style={{ width: '100%', maxWidth: '480px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-indigo)' }}>Add New Employee Record</h3>
-              <button onClick={() => setShowAddModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddSubmit}>
-              <div className="form-group">
-                <label className="form-label">Full Name</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="e.g. Maya Lin"
-                  value={newEmpName}
-                  onChange={(e) => setNewEmpName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">Gender</label>
-                  <select className="form-select" value={newEmpGender} onChange={(e) => setNewEmpGender(e.target.value)}>
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                    <option value="Non-Binary">Non-Binary</option>
-                    <option value="Unspecified">Unspecified</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Annual Salary ($)</label>
-                  <input 
-                    type="number" 
-                    className="form-input font-mono" 
-                    value={newEmpSalary}
-                    onChange={(e) => setNewEmpSalary(Number(e.target.value))}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Department</label>
-                <select className="form-select" value={newEmpDept} onChange={(e) => setNewEmpDept(e.target.value)}>
-                  <option value="Engineering & Ops">Engineering & Ops</option>
-                  <option value="Product & Design">Product & Design</option>
-                  <option value="Sales & Marketing">Sales & Marketing</option>
-                  <option value="Finance & Legal">Finance & Legal</option>
-                  <option value="Executive Leadership">Executive Leadership</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Role Title</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={newEmpRole}
-                  onChange={(e) => setNewEmpRole(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowAddModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-teal" style={{ flex: 2 }}>Save to Disk JSON & Recalculate</button>
-              </div>
-            </form>
+        <aside className="decision-panel">
+          <div className="section-heading"><div><span>Current workload</span><h2>Decision load</h2></div></div>
+          <div className="load-ring" style={{ '--load': `${brief.loadPercent * 3.6}deg` }}>
+            <strong>{brief.loadPercent}%</strong><span>requires action</span>
           </div>
-        </div>
-      )}
+          <div className="load-list">
+            {brief.load.map(item => <div key={item.label}><span><i className={item.tone} />{item.label}</span><strong>{item.value}</strong></div>)}
+          </div>
+          <p>This is workload, not another fairness score. It shows how much of the current HR queue still needs a decision.</p>
+        </aside>
+      </main>
+
+      <section className="decision-grid">
+        <article className="decision-card">
+          <div className="section-heading"><div><span>Hiring</span><h2>Next candidate decisions</h2></div><Link to="/candidate-comparison">Open comparison <ArrowRight size={13} /></Link></div>
+          <div className="decision-list">
+            {brief.candidates.map(candidate => (
+              <div key={candidate.id}>
+                <div className="candidate-initials">{initials(candidate.name)}</div>
+                <div><strong>{candidate.name}</strong><span>{candidate.appliedRole}</span></div>
+                <b>{candidate.meritScore ?? '—'}<small> merit</small></b>
+                <em className={statusTone(candidate.status)}>{candidate.status}</em>
+              </div>
+            ))}
+            {!brief.candidates.length && <Empty text="No candidates are awaiting a decision." />}
+          </div>
+        </article>
+
+        <article className="decision-card">
+          <div className="section-heading"><div><span>Safety &amp; investigations</span><h2>Open case watch</h2></div><Link to="/harassment-dashboard">Manage cases <ArrowRight size={13} /></Link></div>
+          <div className="case-list">
+            {brief.cases.map(item => (
+              <div key={item.id}>
+                <i className={item.severity === 'Urgent' ? 'urgent' : ''}><ShieldAlert size={17} /></i>
+                <div><strong>{item.category}</strong><span>{item.id} · {item.date}</span></div>
+                <b>{item.status}</b>
+              </div>
+            ))}
+            {!brief.cases.length && <Empty text="There are no open workplace cases." />}
+          </div>
+        </article>
+      </section>
+
+      <section className="brief-footer">
+        <article>
+          <div className="section-heading"><div><span>Recorded events</span><h2>Latest activity</h2></div></div>
+          <div className="brief-timeline">
+            {brief.activity.map(item => <div key={`${item.title}-${item.date}`}><i>{item.icon}</i><div><strong>{item.title}</strong><span>{item.detail}</span></div><time>{item.date}</time></div>)}
+          </div>
+        </article>
+        <article className="quick-work">
+          <span>Start new work</span><h2>Quick actions</h2>
+          <div>
+            <Link to="/blind-screening"><FileUp size={17} /><span>Upload resumes</span><ArrowRight size={14} /></Link>
+            <Link to="/candidate-comparison"><Users size={17} /><span>Review candidates</span><ArrowRight size={14} /></Link>
+            <Link to="/compliance-reports"><FileSpreadsheet size={17} /><span>Generate report</span><ArrowRight size={14} /></Link>
+          </div>
+        </article>
+      </section>
+      <style>{styles}</style>
     </div>
   );
 }
 
-function SubScoreProgress({ label, score, color }) {
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
-        <span style={{ fontWeight: 500 }}>{label}</span>
-        <span className="font-mono" style={{ fontWeight: 600 }}>{score}/100</span>
-      </div>
-      <div className="progress-bar-bg">
-        <div className="progress-bar-fill" style={{ width: `${score}%`, backgroundColor: color }}></div>
-      </div>
-    </div>
-  );
+function buildBrief(employees, candidates, alerts, cases, equalityScore) {
+  const activeAlerts = alerts.filter(item => item.status === 'Active');
+  const openCases = cases.filter(item => item.status !== 'Resolved');
+  const urgentCases = openCases.filter(item => item.severity === 'Urgent').length;
+  const pendingCandidates = candidates.filter(item => /pending|review/i.test(item.status)).length;
+  const eligible = employees.filter(item => item.monthsInRole >= 24 && item.performanceRating >= 4);
+  const womenEligible = eligible.filter(item => item.gender === 'Female');
+  const menEligible = eligible.filter(item => item.gender === 'Male');
+  const recommended = people => people.filter(item => item.monthsInRole >= 30 && item.performanceRating >= 4.3).length;
+  const womenRate = womenEligible.length ? recommended(womenEligible) / womenEligible.length * 100 : 0;
+  const menRate = menEligible.length ? recommended(menEligible) / menEligible.length * 100 : 0;
+  const promotionGap = Math.abs(womenRate - menRate);
+  const womenSalary = average(employees.filter(item => item.gender === 'Female').map(item => item.salary).filter(Boolean));
+  const menSalary = average(employees.filter(item => item.gender === 'Male').map(item => item.salary).filter(Boolean));
+  const payGap = menSalary ? Math.abs((womenSalary - menSalary) / menSalary * 100) : 0;
+
+  const tasks = [];
+  openCases.forEach(item => tasks.push({
+    area: 'Workplace safety', priority: item.severity === 'Urgent' ? 'Critical' : 'High',
+    title: `${item.id} needs case action`, detail: item.category,
+    evidence: `${item.status} · reported ${item.date}`, to: '/harassment-dashboard',
+    action: 'Open case', tone: item.severity === 'Urgent' ? 'critical' : 'high', icon: <ShieldAlert size={19} />,
+  }));
+  activeAlerts.forEach(item => tasks.push({
+    area: 'Fairness finding', priority: item.severity === 'High' ? 'High' : 'Review',
+    title: item.title, detail: item.description, evidence: `${item.department} · ${item.metric}`,
+    to: item.actionUrl || '/dashboard', action: 'Investigate', tone: item.severity === 'High' ? 'high' : 'review', icon: <AlertTriangle size={19} />,
+  }));
+  if (pendingCandidates) tasks.push({
+    area: 'Hiring', priority: 'Decision',
+    title: `${pendingCandidates} candidate application${pendingCandidates === 1 ? '' : 's'} waiting`,
+    detail: 'Review merit evidence and record the next hiring decision.',
+    evidence: `${candidates.length} total candidates in the active pipeline`, to: '/candidate-comparison',
+    action: 'Review now', tone: 'normal', icon: <Users size={19} />,
+  });
+  if (eligible.length) tasks.push({
+    area: 'Advancement', priority: promotionGap >= 10 ? 'High' : 'Review',
+    title: `${eligible.length} promotion evaluations are ready`,
+    detail: 'Eligible employees have sufficient performance and time-in-role evidence.',
+    evidence: `${promotionGap.toFixed(1)} point recommendation difference by gender`, to: '/promotion-analytics',
+    action: 'Evaluate', tone: promotionGap >= 10 ? 'high' : 'normal', icon: <TrendingUp size={19} />,
+  });
+  const priority = { critical: 0, high: 1, review: 2, normal: 3 };
+  tasks.sort((a, b) => priority[a.tone] - priority[b.tone]);
+  const openActions = tasks.length;
+  const monitored = employees.length + candidates.length + cases.length + alerts.length;
+  const loadPercent = monitored ? Math.min(100, Math.round((openActions + pendingCandidates + openCases.length) / Math.max(1, monitored) * 100)) : 0;
+  const candidateQueue = [...candidates]
+    .filter(item => !/declined|rejected|hired/i.test(item.status))
+    .sort((a, b) => (b.meritScore || 0) - (a.meritScore || 0)).slice(0, 5);
+  const activity = [
+    ...candidates.slice(0, 2).map(item => ({ title: `${item.name} · ${item.status}`, detail: item.appliedRole, date: item.appliedDate || 'Recent', icon: <Users size={14} /> })),
+    ...openCases.slice(0, 2).map(item => ({ title: `${item.id} · ${item.status}`, detail: item.category, date: item.date, icon: <ShieldAlert size={14} /> })),
+    ...activeAlerts.slice(0, 1).map(item => ({ title: 'Fairness finding active', detail: item.title, date: 'Current', icon: <AlertTriangle size={14} /> })),
+  ].slice(0, 5);
+  return {
+    tasks: tasks.slice(0, 6), cases: openCases.slice(0, 4), candidates: candidateQueue, activity,
+    urgentCases, pendingCandidates, eligibleEmployees: eligible.length, openActions, loadPercent,
+    healthLabel: equalityScore >= 85 && !urgentCases ? 'Organization stable' : urgentCases ? 'Immediate attention' : 'Review required',
+    healthTone: urgentCases ? 'critical' : equalityScore >= 85 ? 'healthy' : 'review',
+    load: [
+      { label: 'Candidate decisions', value: pendingCandidates, tone: 'indigo' },
+      { label: 'Fairness findings', value: activeAlerts.length, tone: 'amber' },
+      { label: 'Open investigations', value: openCases.length, tone: 'coral' },
+      { label: 'Promotion reviews', value: eligible.length, tone: 'teal' },
+    ],
+    payGap,
+  };
 }
 
-function GenderRatioBar({ label, count, pct, color }) {
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.2rem' }}>
-        <span><strong>{label}</strong> ({count} staff)</span>
-        <span className="font-mono">{pct}%</span>
-      </div>
-      <div className="progress-bar-bg">
-        <div className="progress-bar-fill" style={{ width: `${pct}%`, backgroundColor: color }}></div>
-      </div>
-    </div>
-  );
+function average(values) { return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0; }
+function initials(name = '') { return name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase(); }
+function statusTone(status = '') {
+  if (/shortlist|interview|advanced/i.test(status)) return 'positive';
+  if (/declined|rejected/i.test(status)) return 'negative';
+  return 'pending';
 }
+function Empty({ text }) { return <div className="work-empty">{text}</div>; }
+
+const styles = `
+.work-dashboard{display:flex;flex-direction:column;gap:18px;color:var(--text-dark)}.work-hero{display:flex;align-items:center;justify-content:space-between;gap:25px;padding:30px 34px;border-radius:24px;background:linear-gradient(120deg,#252963,#3a4388);color:#fff}.work-hero>div:first-child>span{color:#76d9c7;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}.work-hero h1{margin:7px 0 5px;font-family:var(--font-serif);font-size:39px}.work-hero p{color:rgba(255,255,255,.7);font-size:14px}.health-signal{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:11px;min-width:310px;padding:15px 17px;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(255,255,255,.07)}.health-dot{width:10px;height:10px;border-radius:50%}.health-dot.healthy{background:#70d6c4}.health-dot.review{background:#f3b74e}.health-dot.critical{background:#ff8073;box-shadow:0 0 0 5px rgba(255,128,115,.12)}.health-signal strong,.health-signal span{display:block}.health-signal strong{font-size:12px}.health-signal span{margin-top:3px;color:rgba(255,255,255,.55);font-size:9px}.health-signal>b{font-size:24px}.health-signal b small{color:rgba(255,255,255,.45);font-size:9px}.today-strip{display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border:1px solid var(--border-light);border-radius:18px;background:#fff}.today-strip>div{padding:18px 20px;border-right:1px solid var(--border-light)}.today-strip>div:last-child{border:0}.today-strip span,.today-strip small,.today-strip strong{display:block}.today-strip span{color:var(--text-muted);font-size:9px;font-weight:800;text-transform:uppercase}.today-strip strong{margin:6px 0 3px;color:var(--primary-indigo);font-size:22px}.today-strip small{color:var(--text-muted);font-size:9px}.work-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px}.work-queue,.decision-panel,.decision-card,.brief-footer>article{overflow:hidden;border:1px solid var(--border-light);border-radius:19px;background:#fff}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:19px 21px;border-bottom:1px solid var(--border-light)}.section-heading>div>span{color:var(--secondary-teal);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.section-heading h2{margin-top:3px;color:var(--primary-indigo);font-size:19px}.section-heading>small{color:var(--text-muted);font-size:9px}.section-heading>a{display:flex;align-items:center;gap:4px;color:var(--secondary-teal);font-size:10px;font-weight:750;text-decoration:none}.work-item{display:grid;grid-template-columns:35px 38px 1fr auto;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border-light)}.work-item:last-child{border:0}.work-item.critical{border-left:4px solid var(--accent-coral)}.work-item.high{border-left:4px solid var(--warning-amber)}.work-rank{color:#aeb2be;font-size:10px;font-weight:800}.work-item>i{width:37px;height:37px;display:grid;place-items:center;border-radius:11px;background:var(--neutral-bg);color:var(--primary-indigo)}.work-item.critical>i{background:#fbe6e3;color:var(--accent-coral)}.work-copy>div{display:flex;align-items:center;gap:7px}.work-copy>div span{color:var(--text-muted);font-size:8px;font-weight:800;text-transform:uppercase}.work-copy>div b{padding:3px 6px;border-radius:10px;background:#fff1d6;color:#9a6810;font-size:7px;text-transform:uppercase}.work-item.critical .work-copy>div b{background:#fbe6e3;color:#a9483e}.work-copy h3{margin:4px 0 3px;font-size:12px}.work-copy p{max-width:650px;color:var(--text-muted);font-size:10px;line-height:1.4}.work-copy>small{display:block;margin-top:5px;color:#8a8f9d;font-size:8px}.work-item>a{display:flex;align-items:center;gap:5px;padding:8px 10px;border:1px solid var(--border-light);border-radius:9px;color:var(--primary-indigo);font-size:9px;font-weight:800;text-decoration:none}.queue-clear{display:flex;align-items:center;justify-content:center;gap:11px;padding:45px;color:var(--secondary-teal)}.queue-clear strong,.queue-clear span{display:block}.queue-clear strong{font-size:13px}.queue-clear span{margin-top:3px;color:var(--text-muted);font-size:10px}.decision-panel{padding-bottom:18px}.decision-panel .section-heading{border:0}.load-ring{width:145px;height:145px;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:10px auto 20px;border-radius:50%;background:radial-gradient(circle closest-side,#fff 73%,transparent 75% 99%),conic-gradient(var(--warning-amber) var(--load),#edf0f4 0)}.load-ring strong{font-size:29px}.load-ring span{color:var(--text-muted);font-size:9px}.load-list{margin:0 20px;border-top:1px solid var(--border-light)}.load-list>div{display:flex;align-items:center;justify-content:space-between;padding:10px 1px;border-bottom:1px solid var(--border-light)}.load-list span{display:flex;align-items:center;gap:7px;color:var(--text-muted);font-size:10px}.load-list i{width:8px;height:8px;border-radius:50%}.load-list i.indigo{background:var(--primary-indigo)}.load-list i.amber{background:var(--warning-amber)}.load-list i.coral{background:var(--accent-coral)}.load-list i.teal{background:var(--secondary-teal)}.load-list strong{font-size:11px}.decision-panel>p{margin:14px 20px 0;color:var(--text-muted);font-size:9px;line-height:1.5}.decision-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.candidate-initials{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#e8e9f5;color:var(--primary-indigo);font-size:10px;font-weight:800}.decision-list{padding:3px 19px 12px}.decision-list>div{display:grid;grid-template-columns:34px 1fr 55px 100px;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light)}.decision-list>div:last-child{border:0}.decision-list strong,.decision-list span{display:block}.decision-list strong{font-size:10px}.decision-list span{margin-top:2px;color:var(--text-muted);font-size:9px}.decision-list>div>b{color:var(--primary-indigo);font-size:14px}.decision-list b small{color:var(--text-muted);font-size:8px}.decision-list em{padding:5px 8px;border-radius:12px;text-align:center;font-size:8px;font-style:normal;font-weight:800}.decision-list em.pending{background:#fff1d8;color:#95650f}.decision-list em.positive{background:#dff5ef;color:#237a69}.decision-list em.negative{background:#fbe5e2;color:#aa463b}.case-list{padding:3px 19px 12px}.case-list>div{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light)}.case-list>div:last-child{border:0}.case-list>div>i{width:35px;height:35px;display:grid;place-items:center;border-radius:10px;background:#fff1d8;color:#9c6c17}.case-list>div>i.urgent{background:#fbe5e2;color:var(--accent-coral)}.case-list strong,.case-list span{display:block}.case-list strong{font-size:10px}.case-list span{margin-top:3px;color:var(--text-muted);font-size:8px}.case-list b{padding:5px 7px;border-radius:11px;background:var(--neutral-bg);font-size:8px}.brief-footer{display:grid;grid-template-columns:1fr 360px;gap:12px}.brief-timeline{padding:3px 20px 12px}.brief-timeline>div{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light)}.brief-timeline>div:last-child{border:0}.brief-timeline>div>i{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--neutral-bg);color:var(--primary-indigo)}.brief-timeline strong,.brief-timeline span{display:block}.brief-timeline strong{font-size:10px}.brief-timeline span,.brief-timeline time{color:var(--text-muted);font-size:8px}.quick-work{padding:20px;background:#252963!important;color:#fff}.quick-work>span{color:#74d8c5;font-size:9px;font-weight:800;text-transform:uppercase}.quick-work h2{margin:3px 0 14px;font-family:var(--font-serif);font-size:22px}.quick-work>div{display:flex;flex-direction:column}.quick-work a{display:grid;grid-template-columns:25px 1fr 14px;align-items:center;gap:8px;padding:11px 0;border-top:1px solid rgba(255,255,255,.1);color:#fff;font-size:10px;text-decoration:none}.quick-work a>svg:last-child{color:rgba(255,255,255,.35)}.work-empty{padding:28px!important;color:var(--text-muted);text-align:center;font-size:10px}@media(max-width:1050px){.work-layout,.decision-grid,.brief-footer{grid-template-columns:1fr}.today-strip{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.work-hero{align-items:flex-start;flex-direction:column}.health-signal{min-width:0;width:100%}.today-strip{grid-template-columns:1fr}.work-item{grid-template-columns:30px 36px 1fr}.work-item>a{grid-column:3;width:max-content}.decision-list>div{grid-template-columns:34px 1fr 45px}.decision-list em{grid-column:2/-1;width:max-content}}
+.work-hero>div:first-child>span{font-size:13px}.work-hero p{font-size:16px}.health-signal strong{font-size:14px}.health-signal span{font-size:11px}.health-signal>b{font-size:27px}.health-signal b small{font-size:11px}
+.today-strip span{font-size:11px}.today-strip strong{font-size:25px}.today-strip small{font-size:11px}
+.section-heading>div>span{font-size:11px}.section-heading h2{font-size:21px}.section-heading>small,.section-heading>a{font-size:12px}
+.work-rank{font-size:12px}.work-copy>div span{font-size:10px}.work-copy>div b{font-size:9px}.work-copy h3{font-size:15px}.work-copy p{font-size:12px;line-height:1.5}.work-copy>small{font-size:10px}.work-item>a{font-size:11px}
+.queue-clear strong{font-size:15px}.queue-clear span{font-size:12px}.load-ring span{font-size:11px}.load-list span,.load-list strong{font-size:12px}.decision-panel>p{font-size:11px}
+.candidate-initials{font-size:12px}.decision-list strong{font-size:12px}.decision-list span{font-size:11px}.decision-list>div>b{font-size:16px}.decision-list b small{font-size:10px}.decision-list em{font-size:10px}
+.case-list strong{font-size:12px}.case-list span{font-size:10px}.case-list b{font-size:10px}.brief-timeline strong{font-size:12px}.brief-timeline span,.brief-timeline time{font-size:10px}
+.quick-work>span{font-size:11px}.quick-work a{font-size:12px}.work-empty{font-size:12px}
+`;

@@ -9,12 +9,24 @@ import initialCandidates from '../dataset/candidates.json';
 const API_BASE = 'http://localhost:5000/api';
 
 const DataContext = createContext();
+const employeeDatasetSignature = JSON.stringify(initialEmployees);
+
+async function fetchJSON(url) {
+  const response = await fetch(url);
+  const contentType = response.headers.get('content-type') || '';
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  if (!contentType.includes('application/json')) {
+    throw new Error(`Expected JSON but received ${contentType || 'an unknown response type'}`);
+  }
+  return response.json();
+}
 
 export function DataProvider({ children }) {
   // Initialize state with localStorage if present, otherwise import file dataset
   const [employees, setEmployees] = useState(() => {
     const saved = localStorage.getItem('fairlens_employees');
-    if (saved) {
+    const savedSignature = localStorage.getItem('fairlens_employees_dataset_signature');
+    if (saved && savedSignature === employeeDatasetSignature) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
     return initialEmployees;
@@ -49,6 +61,7 @@ export function DataProvider({ children }) {
   // Sync to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem('fairlens_employees', JSON.stringify(employees));
+    localStorage.setItem('fairlens_employees_dataset_signature', employeeDatasetSignature);
   }, [employees]);
 
   useEffect(() => {
@@ -65,15 +78,18 @@ export function DataProvider({ children }) {
 
   // Fetch live dataset from backend API on mount
   useEffect(() => {
-    fetch(`${API_BASE}/employees`)
-      .then(res => res.json())
-      .then(data => {
+    const loadEmployees = async () => {
+      try {
+        const data = await fetchJSON(`${API_BASE}/employees`);
         if (Array.isArray(data) && data.length > 0) {
           setEmployees(data);
         }
-      })
-      .catch(err => console.log('Backend API offline, using local file dataset:', err));
+      } catch {
+        // The imported dataset remains the source when the optional API is offline.
+      }
+    };
 
+<<<<<<< HEAD
     fetch(`${API_BASE}/candidates`)
       .then(res => res.json())
       .then(data => {
@@ -91,6 +107,9 @@ export function DataProvider({ children }) {
         }
       })
       .catch(err => console.log('Backend API offline, using local safety reports dataset:', err));
+=======
+    loadEmployees();
+>>>>>>> f4a2726 (Complete Dynamic Pages)
   }, []);
 
   // Filtered employees by department
@@ -210,7 +229,8 @@ export function DataProvider({ children }) {
     } catch (err) { console.log(err); }
   };
 
-  // Add a new candidate application (writes to React state, localStorage, and disk JSON via API)
+  // Candidate applications are shared across pages through context and
+  // persisted locally. They do not depend on an optional backend endpoint.
   const addCandidate = async (newCand) => {
     const idNum = Math.floor(100 + Math.random() * 900);
     const formatted = {
@@ -247,31 +267,17 @@ export function DataProvider({ children }) {
 
     setCandidates(prev => [formatted, ...prev]);
 
-    try {
-      await fetch(`${API_BASE}/candidates`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formatted),
-      });
-    } catch (err) { console.log('Error writing candidate to disk JSON server:', err); }
-
     return formatted;
   };
 
   // Update a candidate's screening status (Shortlisted / Declined / Pending Review)
-  const updateCandidateStatus = async (candId, status) => {
+  const updateCandidateStatus = (candId, status) => {
     setCandidates(prev => prev.map(c => (c.id === candId ? { ...c, status } : c)));
-    try {
-      await fetch(`${API_BASE}/candidates/${candId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-    } catch (err) { console.log('Error updating candidate status on disk JSON server:', err); }
   };
 
   const resetToJSONFile = () => {
     localStorage.removeItem('fairlens_employees');
+    localStorage.removeItem('fairlens_employees_dataset_signature');
     localStorage.removeItem('fairlens_bias_alerts');
     localStorage.removeItem('fairlens_safety_reports');
     localStorage.removeItem('fairlens_candidates');

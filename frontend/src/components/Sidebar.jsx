@@ -7,8 +7,13 @@ import {
   DollarSign, 
   TrendingUp, 
   ShieldAlert, 
+<<<<<<< HEAD
   FileSpreadsheet, 
   Settings as SettingsIcon
+=======
+  Lock, 
+  FileSpreadsheet
+>>>>>>> f4a2726 (Complete Dynamic Pages)
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -62,12 +67,6 @@ export default function Sidebar() {
         <NavLink to="/compliance-reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <FileSpreadsheet size={18} />
           <span>Compliance & Audit</span>
-        </NavLink>
-
-        <div className="nav-section-label">Organization</div>
-        <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <SettingsIcon size={18} />
-          <span>Settings & Profiles</span>
         </NavLink>
       </nav>
 

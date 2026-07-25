@@ -16,7 +16,9 @@ app.use(express.json({ limit: '50mb' })); // increased limit for base64 evidence
 
 // Path to single canonical dataset folder
 const DATASET_DIR = path.join(__dirname, '..', 'dataset');
-const EMPLOYEES_FILE = path.join(DATASET_DIR, 'employees.json');
+// Employee records are bundled from this same source by the frontend.
+// Keeping the API on that file prevents two employee datasets drifting apart.
+const EMPLOYEES_FILE = path.join(__dirname, '..', 'frontend', 'src', 'dataset', 'employees.json');
 const BIAS_ALERTS_FILE = path.join(DATASET_DIR, 'bias_alerts.json');
 const SAFETY_REPORTS_FILE = path.join(DATASET_DIR, 'safety_reports.json');
 const RESUMES_FILE = path.join(DATASET_DIR, 'resumes.json');

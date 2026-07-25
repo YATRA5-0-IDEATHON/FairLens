@@ -21,7 +21,6 @@ import HarassmentReportingDashboard from './pages/HarassmentReportingDashboard';
 import EmployeeReportingPortal from './pages/EmployeeReportingPortal';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import ComplianceReports from './pages/ComplianceReports';
-import Settings from './pages/Settings';
 
 function LayoutWrapper({ children }) {
   return (
@@ -71,7 +70,6 @@ export default function App() {
           <Route path="/promotion-analytics" element={<LayoutWrapper><PromotionAnalytics /></LayoutWrapper>} />
           <Route path="/harassment-dashboard" element={<LayoutWrapper><HarassmentReportingDashboard /></LayoutWrapper>} />
           <Route path="/compliance-reports" element={<LayoutWrapper><ComplianceReports /></LayoutWrapper>} />
-          <Route path="/settings" element={<LayoutWrapper><Settings /></LayoutWrapper>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
