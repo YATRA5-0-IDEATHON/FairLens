@@ -1,10 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
+import { AuthProvider } from './context/AuthContext';
 
 // Import Shared Components
 import Sidebar from './components/Sidebar';
 import TopNavbar from './components/TopNavbar';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Import Pages
 import LandingPage from './pages/LandingPage';
@@ -19,6 +21,7 @@ import PerformanceReviewAnalysis from './pages/PerformanceReviewAnalysis';
 import PromotionAnalytics from './pages/PromotionAnalytics';
 import HarassmentReportingDashboard from './pages/HarassmentReportingDashboard';
 import EmployeeReportingPortal from './pages/EmployeeReportingPortal';
+import EmployeeDashboard from './pages/EmployeeDashboard';
 import ComplianceReports from './pages/ComplianceReports';
 import Settings from './pages/Settings';
 
@@ -38,6 +41,7 @@ function LayoutWrapper({ children }) {
 
 export default function App() {
   return (
+    <AuthProvider>
     <DataProvider>
       <Router>
         <Routes>
@@ -46,8 +50,19 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/apply" element={<CandidateHiring />} />
 
-          {/* Anonymous Employee Portal (Standalone without HR Sidebar) */}
-          <Route path="/employee-portal" element={<EmployeeReportingPortal />} />
+          {/* Employee Dashboard — first page after employee login */}
+          <Route path="/employee-dashboard" element={
+            <ProtectedRoute requiredRole="employee">
+              <EmployeeDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Anonymous Employee Reporting Portal (requires auth) */}
+          <Route path="/employee-portal" element={
+            <ProtectedRoute requiredRole="employee">
+              <EmployeeReportingPortal />
+            </ProtectedRoute>
+          } />
 
           {/* HR & Leadership Platform Routes */}
           <Route path="/dashboard" element={<LayoutWrapper><HRDashboard /></LayoutWrapper>} />
@@ -66,5 +81,6 @@ export default function App() {
         </Routes>
       </Router>
     </DataProvider>
+    </AuthProvider>
   );
 }

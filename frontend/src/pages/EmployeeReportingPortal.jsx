@@ -1,14 +1,35 @@
 import React, { useState } from 'react';
-import { Lock, ShieldCheck, AlertTriangle, UploadCloud, Key, ArrowRight, CheckCircle2, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Lock, ShieldCheck, AlertTriangle, UploadCloud, Key, ArrowRight, CheckCircle2, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-export default function EmployeeReportingPortal() {
+export default function EmployeeReportingPortal({ embedded, onBackToDashboard }) {
+  const { auth, logout } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [category, setCategory] = useState("Sexual Harassment / Unwelcome Conduct");
   const [narrative, setNarrative] = useState("");
   const [passkey, setPasskey] = useState(null);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login?role=employee');
+  };
+
+  const handleBackToDashboard = () => {
+    if (onBackToDashboard) {
+      onBackToDashboard();
+    } else {
+      navigate('/employee-dashboard');
+    }
+  };
+
   const handleQuickExit = () => {
-    window.location.href = "https://www.google.com";
+    if (onBackToDashboard) {
+      onBackToDashboard();
+    } else {
+      navigate('/employee-dashboard');
+    }
   };
 
   const handleNextStep = (e) => {
@@ -24,44 +45,100 @@ export default function EmployeeReportingPortal() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--neutral-bg)', color: 'var(--text-dark)', padding: '2rem' }}>
-      {/* Quick Exit Header Bar */}
-      <div style={{ maxWidth: '800px', margin: '0 auto 2rem auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #3FA796, #E85D4E)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-serif)', color: '#FFF' }}>
-            FL
-          </div>
-          <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--primary-indigo)' }}>FairLens Safe Portal</span>
-        </div>
+    <div style={{ 
+      minHeight: embedded ? 'auto' : '100vh', 
+      backgroundColor: embedded ? 'transparent' : 'var(--neutral-bg)', 
+      color: 'var(--text-dark)', 
+      padding: embedded ? 0 : '2rem' 
+    }}>
 
-        {/* Quick Exit Button */}
-        <button 
-          onClick={handleQuickExit} 
-          className="btn btn-coral btn-sm" 
-          title="Click or press ESC to immediately close this page and redirect to Google"
-        >
-          <LogOut size={14} />
-          <span>Quick Exit (ESC)</span>
-        </button>
-      </div>
-
-      {/* Security Banner */}
-      <div style={{ maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
-        <div className="anonymity-shield-banner">
-          <Lock size={24} color="var(--secondary-teal)" />
-          <div>
-            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary-indigo)' }}>
-              Zero-Knowledge Encrypted Session
+      {/* Top bar — only when NOT embedded (standalone page) */}
+      {!embedded && (
+        <div style={{ maxWidth: '800px', margin: '0 auto 2rem auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #3FA796, #E85D4E)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-serif)', color: '#FFF' }}>
+              FL
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Your IP address is not logged. No login required. You will receive an anonymous claim passkey to check status safely.
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--primary-indigo)' }}>FairLens Safe Portal</span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {/* Back to Dashboard Button */}
+            <button 
+              onClick={handleBackToDashboard} 
+              className="btn btn-outline btn-sm" 
+              title="Go back to your employee dashboard"
+              style={{ borderColor: 'var(--border-light)' }}
+            >
+              <ArrowRight size={14} />
+              <span>Dashboard</span>
+            </button>
+
+            {/* Logout Button */}
+            <button 
+              onClick={handleLogout} 
+              className="btn btn-outline btn-sm" 
+              title="Log out and return to login page"
+              style={{ borderColor: 'var(--border-light)' }}
+            >
+              <LogIn size={14} />
+              <span>Logout</span>
+            </button>
+
+            {/* Quick Exit Button */}
+            <button 
+              onClick={handleQuickExit} 
+              className="btn btn-outline btn-sm" 
+              title="Go back to your employee dashboard"
+              style={{ borderColor: 'var(--border-light)' }}
+            >
+              <ArrowRight size={14} />
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* In embedded mode, show a compact header instead */}
+      {embedded && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div className="anonymity-shield-banner" style={{ marginBottom: '0.75rem' }}>
+            <Lock size={20} color="var(--secondary-teal)" />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--primary-indigo)' }}>
+                Zero-Knowledge Encrypted Session
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Your IP address is not logged. You will receive an anonymous claim passkey to check status.
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Security Banner — only when NOT embedded */}
+      {!embedded && (
+        <div style={{ maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
+          <div className="anonymity-shield-banner">
+            <Lock size={24} color="var(--secondary-teal)" />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary-indigo)' }}>
+                Zero-Knowledge Encrypted Session
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Your IP address is not logged. No login required. You will receive an anonymous claim passkey to check status safely.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Wizard Form Container */}
-      <div className="card" style={{ maxWidth: '800px', margin: '0 auto', boxShadow: 'var(--shadow-lg)' }}>
+      <div className="card" style={{ 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        boxShadow: embedded ? 'var(--shadow-sm)' : 'var(--shadow-lg)' 
+      }}>
         {/* Wizard Steps Header */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
           <StepHeader num={1} label="Category" active={step === 1} done={step > 1} />
@@ -189,7 +266,8 @@ export default function EmployeeReportingPortal() {
               </div>
 
               <button type="button" onClick={handleQuickExit} className="btn btn-teal">
-                <span>Done & Exit Safely</span>
+                <ArrowRight size={16} />
+                <span>Back to Dashboard</span>
               </button>
             </div>
           )}

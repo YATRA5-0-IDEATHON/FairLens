@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, Shield, ArrowRight, UserCheck, Building2, Key, CheckCircle, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 // Mock Company Code Database for Authentication
 const MOCK_COMPANY_DATABASE = [
@@ -25,6 +26,7 @@ export default function Login() {
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export default function Login() {
 
     if (matchedCompany) {
       setAuthSuccess(`Authenticated successfully for ${matchedCompany.name} (${matchedCompany.code})!`);
+      login({ role: 'hr', companyName: matchedCompany.name, companyCode: matchedCompany.code });
       setTimeout(() => {
         navigate('/dashboard');
       }, 800);
@@ -57,8 +60,9 @@ export default function Login() {
   const handleEmployeeLogin = (e) => {
     e.preventDefault();
     setAuthSuccess('Anonymous Access Granted');
+    login({ role: 'employee', employeeId: employeeId || null });
     setTimeout(() => {
-      navigate('/employee-portal');
+      navigate('/employee-dashboard');
     }, 600);
   };
 
