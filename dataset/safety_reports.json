@@ -1,5 +1,49 @@
 [
   {
+    "id": "SAFE-768",
+    "passkey": "FL-PASSKEY-M7C3KZOB-1ILF3IQK",
+    "category": "Sexual Harassment / Unwelcome Conduct",
+    "severity": "Standard",
+    "date": "July 26, 2026",
+    "status": "Pending Review",
+    "narrative": "dewew",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "06:10 AM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "fdfd",
+        "time": "06:10 AM"
+      }
+    ]
+  },
+  {
+    "id": "SAFE-938",
+    "passkey": "FL-PASSKEY-IQAHD69A-NS93W0TQ",
+    "category": "Sexual Harassment / Unwelcome Conduct",
+    "severity": "Standard",
+    "date": "July 26, 2026",
+    "status": "Pending Review",
+    "narrative": "soham touched me",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "04:38 AM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello.. soham touched me.. pls save me",
+        "time": "04:38 AM"
+      }
+    ]
+  },
+  {
     "id": "SAFE-362",
     "passkey": "FL-PASSKEY-QANMP1YY-DW00TAKT",
     "category": "Sexual Harassment / Unwelcome Conduct",

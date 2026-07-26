@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useCallback } from 'react';
 import { useData } from '../context/DataContext';
 import {
   EyeOff, ShieldCheck, CheckCircle2, XCircle, Lock, Briefcase,
-  AlertTriangle, Award, BarChart2, Upload, Loader2, ScanLine,
+  Award, BarChart2, Upload, Loader2, ScanLine,
   FileText, Calendar, ChevronRight,
 } from 'lucide-react';
 import {
@@ -87,9 +87,9 @@ function ResumeSection({ title, lines }) {
 
 // Render one line — highlight redacted tokens, style bullets and date-ranges
 function ResumeLine({ text }) {
-  const isBullet   = text.startsWith('• ');
+  const isBullet = text.startsWith('• ');
   const isDateLine = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d{4})\b.*\b(present|current|\d{4})\b/i.test(text);
-  const isRole     = !isBullet && !isDateLine && text.length < 90
+  const isRole = !isBullet && !isDateLine && text.length < 90
     && /\b(engineer|developer|manager|analyst|designer|architect|consultant|specialist|director|lead|intern|scientist|researcher)\b/i.test(text);
 
   const display = isBullet ? text.slice(2) : text;
@@ -194,9 +194,8 @@ export default function BlindResumeScreening() {
 
   // Per-candidate: { rawOcr, structuredText, anonymized, redactedCount, skills, expYears, meritScore }
   const [ocrResults, setOcrResults] = useState({});
-  const [uploadState, setUploadState]   = useState('idle'); // idle | loading | done | error
-  const [uploadError, setUploadError]   = useState('');
-  const [assessments, setAssessments]   = useState({});     // { [id]: { skillAlign, expRelevance, notes } }
+  const [uploadState, setUploadState] = useState('idle'); // idle | loading | done | error
+  const [uploadError, setUploadError] = useState('');
   const fileRef = useRef(null);
 
   // ── selected candidate ──────────────────────────────────────────────────
@@ -225,10 +224,10 @@ export default function BlindResumeScreening() {
 
   const anonymized = useMemo(() => {
     return anonymizeStructuredText(effectiveRaw, {
-      name:     candidate.name,
-      email:    candidate.email,
+      name: candidate.name,
+      email: candidate.email,
       location: candidate.location,
-      school:   candidate.education?.school,
+      school: candidate.education?.school,
     });
   }, [effectiveRaw, candidate]);
 
@@ -279,9 +278,9 @@ export default function BlindResumeScreening() {
         throw new Error('Could not extract readable text. The PDF may be image-only — try a text-based PDF.');
       }
       const structured = structureRawOcrText(raw);
-      const extracted  = extractSkillsFromText(raw);
-      const expY       = extractExperienceYears(raw);
-      const merit      = computeMeritScore(raw, extracted);
+      const extracted = extractSkillsFromText(raw);
+      const expY = extractExperienceYears(raw);
+      const merit = computeMeritScore(raw, extracted);
 
       setOcrResults(prev => ({
         ...prev,
@@ -304,14 +303,6 @@ export default function BlindResumeScreening() {
     e.preventDefault();
     handleFile(e.dataTransfer.files[0]);
   }, [handleFile]);
-
-  // ── assessment helpers ──────────────────────────────────────────────────
-  const getA = (id) => assessments[id] || { skillAlign: '4', expRelevance: '4', notes: '' };
-  const setA = (id, key, val) =>
-    setAssessments(prev => ({ ...prev, [id]: { ...getA(id), [key]: val } }));
-
-  const a = getA(cid);
-  const compositeScore = Math.round(((Number(a.skillAlign) + Number(a.expRelevance)) / 10) * 100);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -454,9 +445,9 @@ export default function BlindResumeScreening() {
             onClick={() => uploadState !== 'loading' && fileRef.current?.click()}
             style={{
               padding: '0.65rem 1.25rem',
-              background: uploadState === 'done'  ? 'rgba(63,167,150,0.09)'
-                        : uploadState === 'error' ? 'rgba(220,38,38,0.07)'
-                        : 'rgba(99,102,241,0.06)',
+              background: uploadState === 'done' ? 'rgba(63,167,150,0.09)'
+                : uploadState === 'error' ? 'rgba(220,38,38,0.07)'
+                  : 'rgba(99,102,241,0.06)',
               borderBottom: '1px solid var(--border-light)',
               display: 'flex', alignItems: 'center', gap: '0.7rem',
               cursor: uploadState === 'loading' ? 'default' : 'pointer',
@@ -480,9 +471,9 @@ export default function BlindResumeScreening() {
               color: uploadState === 'error' ? '#DC2626' : 'var(--text-dark)',
             }}>
               {uploadState === 'loading' && 'Extracting and structuring PDF text…'}
-              {uploadState === 'done'    && `✓ PDF processed — ${skills.length} skills detected, ${anonymized.redactedCount} PII fields redacted`}
-              {uploadState === 'error'   && (uploadError || 'Upload failed')}
-              {uploadState === 'idle'    && (ocr ? 'Re-upload a PDF to refresh' : 'Drop or click to upload candidate PDF — text will be extracted, structured, and redacted')}
+              {uploadState === 'done' && `✓ PDF processed — ${skills.length} skills detected, ${anonymized.redactedCount} PII fields redacted`}
+              {uploadState === 'error' && (uploadError || 'Upload failed')}
+              {uploadState === 'idle' && (ocr ? 'Re-upload a PDF to refresh' : 'Drop or click to upload candidate PDF — text will be extracted, structured, and redacted')}
             </span>
           </div>
 
@@ -553,8 +544,8 @@ export default function BlindResumeScreening() {
                 <div className="progress-bar-fill" style={{
                   width: `${meritScore}%`,
                   background: meritScore >= 80 ? 'linear-gradient(90deg, var(--secondary-teal), #45B7A0)'
-                            : meritScore >= 60 ? 'linear-gradient(90deg, var(--warning-amber), #F5B342)'
-                            : 'linear-gradient(90deg, var(--accent-coral), #E85D4E)',
+                    : meritScore >= 60 ? 'linear-gradient(90deg, var(--warning-amber), #F5B342)'
+                      : 'linear-gradient(90deg, var(--accent-coral), #E85D4E)',
                 }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
@@ -565,40 +556,6 @@ export default function BlindResumeScreening() {
             </div>
           </div>
 
-          {/* Recruiter assessment */}
-          <div className="card">
-            <h3 className="card-title" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <AlertTriangle size={16} color="var(--primary-indigo)" />
-              Structured Recruiter Assessment (Blind)
-            </h3>
-
-            <div className="form-group">
-              <label className="form-label">Skill Alignment Score</label>
-              <select className="form-select" value={a.skillAlign} onChange={e => setA(cid, 'skillAlign', e.target.value)}>
-                <option value="5">5 — Exceptional match to role requirements</option>
-                <option value="4">4 — Strong alignment</option>
-                <option value="3">3 — Adequate fit</option>
-                <option value="2">2 — Below expectations</option>
-                <option value="1">1 — Significant gaps</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Experience Relevance</label>
-              <select className="form-select" value={a.expRelevance} onChange={e => setA(cid, 'expRelevance', e.target.value)}>
-                <option value="5">5 — Highly relevant experience</option>
-                <option value="4">4 — Relevant background</option>
-                <option value="3">3 — Somewhat relevant</option>
-                <option value="2">2 — Limited relevance</option>
-                <option value="1">1 — Not relevant</option>
-              </select>
-            </div>
-
-            <div style={{ marginTop: '0.75rem', padding: '0.5rem 0.75rem', background: 'rgba(99,102,241,0.07)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>Composite Recruiter Score</span>
-              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-indigo)' }}>{compositeScore}%</span>
-            </div>
-          </div>
 
           {/* HR decision */}
           <div className="card" style={{

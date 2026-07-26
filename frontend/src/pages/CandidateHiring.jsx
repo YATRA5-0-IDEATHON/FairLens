@@ -100,219 +100,86 @@ export default function CandidateHiring() {
   };
 
   return (
-    <div style={{ backgroundColor: 'var(--neutral-bg)', minHeight: '100vh', color: 'var(--text-dark)' }}>
-      {/* Header Bar */}
-      <nav style={{ background: 'var(--primary-indigo)', color: '#FFF', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #3FA796, #E85D4E)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-serif)', fontSize: '1.2rem', color: '#FFF' }}>
-            FL
-          </div>
-          <div>
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.3rem', fontWeight: 600 }}>FairLens Hiring</span>
-            <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '4px', marginLeft: '6px' }}>Blind Portal</span>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <Link to="/" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.85rem' }}>← Back to Home</Link>
-          <Link to="/login?role=hr" className="btn btn-teal btn-sm">
-            <Building2 size={14} />
-            <span>HR Portal</span>
-          </Link>
+    <div className="apply-page">
+      <nav className="apply-nav">
+        <Link className="apply-brand" to="/"><b>FL</b><span>FairLens</span></Link>
+        <div>
+          <Link to="/">Home</Link>
+          <Link className="hr-link" to="/login?role=hr"><Building2 size={15} /> HR sign in</Link>
         </div>
       </nav>
 
-      {/* Main Content Container */}
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '3rem 1.5rem' }}>
-        
-        {/* Banner */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div className="badge badge-teal" style={{ marginBottom: '0.75rem', padding: '6px 14px' }}>
-            <EyeOff size={14} />
-            <span>100% Bias-Protected Blind Application System</span>
-          </div>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.5rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>
-            Submit Your Resume for Equal Opportunity Hiring
-          </h1>
-          <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', maxWidth: '650px', margin: '0 auto', lineHeight: 1.5 }}>
-            Our FairLens AI engine redacts your name, photos, gender, age, and demographic identifiers before hiring managers see your application. You will be evaluated strictly on merit.
-          </p>
-        </div>
+      <main className="apply-shell">
+        <header className="apply-intro">
+          <span><EyeOff size={15} /> Blind application</span>
+          <h1>Apply for your next role.</h1>
+          <p>Your resume is reviewed for skills and experience. Personal details stay hidden from the hiring team.</p>
+        </header>
 
-        {/* Application Submitted Success View */}
         {submittedCandidate ? (
-          <div className="card" style={{ padding: '3rem', textAlign: 'center', background: 'var(--surface-white)', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--secondary-teal-light)', color: 'var(--secondary-teal)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
-              <CheckCircle2 size={36} />
+          <section className="apply-card success-card">
+            <i className="success-icon"><CheckCircle2 size={32} /></i>
+            <span className="success-label">Application received</span>
+            <h2>You’re all set.</h2>
+            <p>Your application for <strong>{submittedCandidate.appliedRole}</strong> is now under blind review.</p>
+            <div className="receipt">
+              <div><span>Candidate code</span><strong>{submittedCandidate.id}</strong></div>
+              <div><span>Status</span><strong className="status">Under review</strong></div>
+              <div><span>Details protected</span><strong>{submittedCandidate.redactedCount || 0} fields</strong></div>
             </div>
-            
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>
-              Application Submitted Successfully!
-            </h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-              Your resume has been anonymized and added to the hiring pipeline for <strong style={{ color: 'var(--primary-indigo)' }}>{submittedCandidate.appliedRole}</strong>.
-            </p>
-
-            <div style={{ background: 'var(--neutral-bg)', border: '1px solid var(--border-light)', borderRadius: '12px', padding: '1.5rem', maxWidth: '500px', margin: '0 auto 2rem auto', textAlign: 'left' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Anonymous Candidate Code:</span>
-                <span className="font-mono" style={{ fontWeight: 700, color: 'var(--secondary-teal)' }}>{submittedCandidate.id}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Status:</span>
-                <span className="badge badge-teal">Under Blind Review</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>PII Elements Redacted:</span>
-                <span style={{ fontWeight: 600 }}>{submittedCandidate.redactedCount || 0} Fields Masked</span>
-              </div>
+            <div className="success-actions">
+              <button type="button" onClick={() => { setSubmittedCandidate(null); setSelectedImage(null); setResumeText(''); setResumeAnalysis(null); }}>Submit another</button>
+              <Link to="/">Back home <ArrowRight size={15} /></Link>
             </div>
-
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-              <button className="btn btn-outline" onClick={() => { setSubmittedCandidate(null); setSelectedImage(null); setResumeText(''); setResumeAnalysis(null); }}>
-                Submit Another Resume
-              </button>
-              <Link to="/blind-screening" className="btn btn-primary">
-                <span>View Blind Candidate Queue</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
+          </section>
         ) : (
-          /* Application Submission Form */
-          <form onSubmit={handleSubmitApplication} className="card" style={{ padding: '2.5rem', background: 'var(--surface-white)', boxShadow: 'var(--shadow-lg)' }}>
-            
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
-                1. Job Target & Contact Information
-              </h3>
-
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">Applying For Position / Role:</label>
-                  <select 
-                    className="form-select" 
-                    value={jobTitle} 
-                    onChange={(e) => setJobTitle(e.target.value)}
-                  >
+          <form onSubmit={handleSubmitApplication} className="apply-card">
+            <section className="form-section">
+              <div className="section-title"><b>01</b><div><h2>Your application</h2><p>Tell us where we can contact you.</p></div></div>
+              <div className="apply-grid">
+                <label><span>Role</span>
+                  <select value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}>
                     <option value="Senior Full Stack Software Engineer">Senior Full Stack Software Engineer</option>
                     <option value="Data Scientist & AI Specialist">Data Scientist & AI Specialist</option>
                     <option value="Lead UI/UX Product Designer">Lead UI/UX Product Designer</option>
                     <option value="DevOps & Cloud Infrastructure Lead">DevOps & Cloud Infrastructure Lead</option>
                     <option value="Product Manager">Product Manager</option>
                   </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Full Name (Confidential Audit Log Only):</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    placeholder="e.g. Alex Morgan"
-                    value={candidateName}
-                    onChange={(e) => setCandidateName(e.target.value)}
-                    required
-                  />
-                </div>
+                </label>
+                <label><span>Full name <small>kept private</small></span><input type="text" placeholder="Alex Morgan" value={candidateName} onChange={(e) => setCandidateName(e.target.value)} required /></label>
+                <label className="full"><span>Email address</span><input type="email" placeholder="alex@example.com" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} required /></label>
               </div>
+            </section>
 
-              <div className="form-group">
-                <label className="form-label">Email Address (Used only for receipt confirmation):</label>
-                <input 
-                  type="email" 
-                  className="form-input" 
-                  placeholder="alex.morgan@example.com"
-                  value={candidateEmail}
-                  onChange={(e) => setCandidateEmail(e.target.value)}
-                  required
-                />
+            <section className="form-section resume-section">
+              <div className="section-title"><b>02</b><div><h2>Your resume</h2><p>Upload one PDF document.</p></div></div>
+              <div className={`pdf-drop ${selectedImage ? 'has-file' : ''}`} onDragOver={handleDragOver} onDrop={handleDrop}>
+                <input type="file" accept=".pdf,application/pdf" id="resume-image-input" onChange={handleImageChange} />
+                <label htmlFor="resume-image-input">
+                  <i>{extractionStatus === 'Extraction complete' ? <CheckCircle2 size={25} /> : <Upload size={25} />}</i>
+                  <div><strong>{selectedImage ? selectedImage.name : 'Drop your PDF here'}</strong><span>{selectedImage ? 'Click to replace this file' : 'or click to choose a file'}</span></div>
+                  <em>PDF only</em>
+                </label>
               </div>
-            </div>
+              {extractionStatus && <div className="file-message success">{extractionStatus !== 'Extraction complete' && <LoaderCircle size={16} className="spin" />}{extractionStatus === 'Extraction complete' && <CheckCircle2 size={16} />}{extractionStatus}</div>}
+              {extractionError && <div className="file-message error"><AlertCircle size={16} /> {extractionError}</div>}
+            </section>
 
-            {/* Resume Upload Section */}
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
-                <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', margin: 0 }}>
-                  2. Upload PDF Resume
-                </h3>
-              </div>
-
-              <div>
-                  <div 
-                    onDragOver={handleDragOver} 
-                    onDrop={handleDrop}
-                    style={{
-                      border: '2px dashed var(--secondary-teal)',
-                      borderRadius: '12px',
-                      padding: '2.5rem',
-                      textAlign: 'center',
-                      background: 'var(--secondary-teal-light)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    <input 
-                      type="file" 
-                      accept=".pdf,application/pdf"
-                      id="resume-image-input" 
-                      onChange={handleImageChange}
-                      style={{ display: 'none' }} 
-                    />
-                    
-                    <label htmlFor="resume-image-input" style={{ cursor: 'pointer', display: 'block' }}>
-                      <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--surface-white)', color: 'var(--secondary-teal)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: 'var(--shadow-sm)' }}>
-                        <Upload size={28} />
-                      </div>
-                      <h4 style={{ fontSize: '1.1rem', color: 'var(--primary-indigo)', marginBottom: '0.4rem' }}>
-                        Drag & Drop Your Resume Here
-                      </h4>
-                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        PDF documents only — text is extracted automatically.
-                      </p>
-                    </label>
-                  </div>
-
-                  {extractionStatus && (
-                    <div style={{ marginTop: '1rem', color: 'var(--secondary-teal)', display: 'flex', alignItems: 'center', gap: '.5rem', fontSize: '.85rem', fontWeight: 600 }}>
-                      {extractionStatus !== 'Extraction complete' && <LoaderCircle size={16} className="spin" />}
-                      {extractionStatus === 'Extraction complete' && <CheckCircle2 size={16} />}
-                      {extractionStatus}
-                      {selectedImage?.name && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— {selectedImage.name}</span>}
-                    </div>
-                  )}
-                  {extractionError && (
-                    <div style={{ marginTop: '1rem', color: 'var(--accent-coral)', display: 'flex', alignItems: 'center', gap: '.5rem', fontSize: '.85rem' }}>
-                      <AlertCircle size={16} /> {extractionError}
-                    </div>
-                  )}
-              </div>
-            </div>
-
-            {/* Blind Guarantee box */}
-            <div style={{ background: 'var(--secondary-teal-light)', border: '1px solid var(--secondary-teal)', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-              <ShieldCheck size={24} color="var(--secondary-teal)" style={{ shrink: 0 }} />
-              <div style={{ fontSize: '0.825rem', color: 'var(--primary-indigo)', lineHeight: 1.4 }}>
-                <strong>FairLens Blind Guarantee:</strong> Your name, email, contact details, pronouns, photo, and age will be redacted automatically before hiring managers evaluate your profile.
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-              <button type="button" className="btn btn-outline" onClick={() => navigate('/')}>
-                Cancel
-              </button>
-              <button 
-                type="submit" 
-                className="btn btn-teal btn-lg"
-                disabled={isSubmitting || !resumeText.trim() || !resumeAnalysis}
-              >
-                <Sparkles size={18} />
-                <span>{isSubmitting ? 'Processing Application...' : 'Submit Blind Application'}</span>
+            <div className="privacy-note"><ShieldCheck size={21} /><p><strong>Your personal details stay private.</strong> HR receives an anonymized profile focused on your experience and skills.</p></div>
+            <div className="apply-actions">
+              <button type="button" className="cancel-button" onClick={() => navigate('/')}>Cancel</button>
+              <button type="submit" className="submit-button" disabled={isSubmitting || !resumeText.trim() || !resumeAnalysis}>
+                <Sparkles size={17} /><span>{isSubmitting ? 'Submitting…' : 'Submit application'}</span><ArrowRight size={16} />
               </button>
             </div>
           </form>
         )}
-      </div>
+      </main>
+      <style>{styles}</style>
     </div>
   );
 }
+
+const styles = `
+.apply-page{min-height:100vh;background:#f8fafc;color:#111827}.apply-nav{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 max(5vw,24px);border-bottom:1px solid #e5e7eb;background:rgba(255,255,255,.9);backdrop-filter:blur(14px)}.apply-brand{display:flex;align-items:center;gap:10px;color:#111827;font-family:var(--font-serif);font-size:20px;font-weight:700;text-decoration:none}.apply-brand b{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#111827;color:#fff;font-family:Inter,sans-serif;font-size:12px}.apply-nav>div{display:flex;align-items:center;gap:24px}.apply-nav>div a{color:#667085;font-size:13px;font-weight:650;text-decoration:none}.apply-nav .hr-link{display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid #d9dee7;border-radius:10px;background:#fff;color:#111827}.apply-shell{width:min(900px,calc(100% - 32px));margin:0 auto;padding:62px 0 90px}.apply-intro{max-width:680px;margin:0 auto 34px;text-align:center;animation:apply-rise .55s both}.apply-intro>span{display:flex;align-items:center;justify-content:center;gap:7px;color:#2563eb;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.apply-intro h1{margin:12px 0 10px;font-family:var(--font-serif);font-size:clamp(40px,6vw,58px);line-height:1;letter-spacing:-.05em}.apply-intro p{max-width:610px;margin:auto;color:#667085;font-size:16px;line-height:1.65}.apply-card{overflow:hidden;padding:0;border:1px solid #e1e5eb;border-radius:22px;background:#fff;box-shadow:0 24px 65px rgba(17,24,39,.08);animation:apply-rise .65s .08s both}.form-section{padding:30px 34px;border-bottom:1px solid #e8eaee}.section-title{display:flex;align-items:flex-start;gap:13px;margin-bottom:24px}.section-title>b{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;background:#eef3ff;color:#2563eb;font-size:11px}.section-title h2{margin:0 0 3px;font-family:var(--font-serif);font-size:21px}.section-title p{color:#98a2b3;font-size:12px}.apply-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.apply-grid label{display:block}.apply-grid label.full{grid-column:1/-1}.apply-grid label>span{display:flex;justify-content:space-between;margin-bottom:8px;color:#344054;font-size:13px;font-weight:700}.apply-grid label small{color:#98a2b3;font-size:10px;font-weight:600}.apply-grid input,.apply-grid select{width:100%;height:47px;padding:0 13px;border:1px solid #d8dde5;border-radius:10px;outline:none;background:#fff;color:#111827;font:inherit;font-size:14px;transition:.2s}.apply-grid input:focus,.apply-grid select:focus{border-color:#7da2f7;box-shadow:0 0 0 4px rgba(37,99,235,.08)}.resume-section{border-bottom:0}.pdf-drop{border:1.5px dashed #aeb7c5;border-radius:14px;background:#fafbfc;transition:.25s}.pdf-drop:hover{border-color:#2563eb;background:#f7f9ff}.pdf-drop.has-file{border-style:solid;border-color:#a9bce9;background:#f8faff}.pdf-drop input{display:none}.pdf-drop label{display:flex;align-items:center;gap:14px;padding:22px;cursor:pointer}.pdf-drop label>i{width:46px;height:46px;display:grid;flex:none;place-items:center;border-radius:11px;background:#eef3ff;color:#2563eb}.pdf-drop label>div{display:flex;min-width:0;flex:1;flex-direction:column;gap:3px}.pdf-drop strong{overflow:hidden;font-size:14px;text-overflow:ellipsis;white-space:nowrap}.pdf-drop label span{color:#98a2b3;font-size:12px}.pdf-drop em{padding:5px 8px;border-radius:6px;background:#eceff3;color:#667085;font-size:10px;font-style:normal;font-weight:800;text-transform:uppercase}.file-message{display:flex;align-items:center;gap:7px;margin-top:11px;font-size:12px;font-weight:700}.file-message.success{color:#207a55}.file-message.error{color:#b42318}.privacy-note{display:flex;align-items:flex-start;gap:12px;margin:0 34px;padding:17px 0;color:#475467}.privacy-note svg{flex:none;color:#2563eb}.privacy-note p{font-size:12px;line-height:1.55}.privacy-note strong{color:#111827}.apply-actions{display:flex;justify-content:flex-end;gap:10px;padding:20px 34px;border-top:1px solid #e8eaee;background:#fafbfc}.apply-actions button,.success-actions>*{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:750;cursor:pointer;text-decoration:none}.cancel-button{border:1px solid #d7dce4;background:#fff;color:#475467}.submit-button{min-width:205px;border:0;background:#111827;color:#fff;box-shadow:0 8px 18px rgba(17,24,39,.16);transition:.2s}.submit-button:hover:not(:disabled){transform:translateY(-2px);background:#2563eb}.submit-button:disabled{opacity:.45;cursor:not-allowed}.success-card{padding:55px 45px;text-align:center}.success-icon{width:62px;height:62px;display:grid;place-items:center;margin:0 auto 17px;border-radius:50%;background:#eaf8f1;color:#23845e}.success-label{color:#23845e;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.success-card h2{margin:8px 0;font-family:var(--font-serif);font-size:38px}.success-card>p{color:#667085;font-size:14px}.receipt{max-width:540px;margin:27px auto;padding:5px 20px;border:1px solid #e3e6eb;border-radius:13px;background:#f8fafc}.receipt>div{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #e5e7eb;font-size:12px}.receipt>div:last-child{border:0}.receipt span{color:#667085}.receipt strong{color:#111827}.receipt .status{color:#2563eb}.success-actions{display:flex;justify-content:center;gap:10px}.success-actions button{border:1px solid #d7dce4;background:#fff;color:#475467}.success-actions a{background:#111827;color:#fff}@keyframes apply-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}@media(max-width:650px){.apply-nav{padding:0 16px}.apply-nav>div>a:first-child{display:none}.apply-shell{padding-top:42px}.apply-intro h1{font-size:40px}.apply-intro p{font-size:14px}.form-section{padding:25px 20px}.apply-grid{grid-template-columns:1fr}.apply-grid label.full{grid-column:auto}.pdf-drop label{padding:17px}.pdf-drop em{display:none}.privacy-note{margin:0 20px}.apply-actions{padding:17px 20px}.submit-button{min-width:0;flex:1}.success-card{padding:42px 20px}.receipt{padding:4px 13px}.success-actions{flex-direction:column}}@media(prefers-reduced-motion:reduce){.apply-page *{animation:none!important;transition:none!important}}
+`;

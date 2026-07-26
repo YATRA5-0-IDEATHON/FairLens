@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, ShieldCheck, UploadCloud, ArrowRight, CheckCircle2, LogIn, Send, MessageSquare, Paperclip, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import { Lock, ShieldCheck, UploadCloud, ArrowRight, CheckCircle2, LogOut, Send, MessageSquare, Paperclip, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
@@ -161,7 +161,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
   };
 
   return (
-    <div style={{
+    <div className={`employee-report-portal ${embedded ? 'embedded' : 'standalone'}`} style={{
       minHeight: embedded ? 'auto' : '100vh',
       backgroundColor: embedded ? 'transparent' : 'var(--neutral-bg)',
       color: 'var(--text-dark)',
@@ -170,16 +170,15 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
 
       {/* Top bar — only when NOT embedded (standalone page) */}
       {!embedded && (
-        <div style={{ maxWidth: '800px', margin: '0 auto 2rem auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #3FA796, #E85D4E)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-serif)', color: '#FFF' }}>
+        <div className="report-topbar" style={{ maxWidth: '800px', margin: '0 auto 2rem auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="report-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ width: '32px', height: '32px', background: '#17191d', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontFamily: 'var(--font-sans)', color: '#FFF', fontSize: '11px' }}>
               FL
             </div>
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--primary-indigo)' }}>FairLens Safe Portal</span>
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--primary-indigo)' }}>Private support</span>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            {/* Back to Dashboard Button */}
+          <div className="report-top-actions" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <button
               onClick={handleBackToDashboard}
               className="btn btn-outline btn-sm"
@@ -189,27 +188,14 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
               <ArrowRight size={14} />
               <span>Dashboard</span>
             </button>
-
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="btn btn-outline btn-sm"
               title="Log out and return to login page"
               style={{ borderColor: 'var(--border-light)' }}
             >
-              <LogIn size={14} />
-              <span>Logout</span>
-            </button>
-
-            {/* Quick Exit Button */}
-            <button
-              onClick={handleQuickExit}
-              className="btn btn-outline btn-sm"
-              title="Go back to your employee dashboard"
-              style={{ borderColor: 'var(--border-light)' }}
-            >
-              <ArrowRight size={14} />
-              <span>Back to Dashboard</span>
+              <LogOut size={14} />
+              <span>Sign out</span>
             </button>
           </div>
         </div>
@@ -222,10 +208,10 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
             <Lock size={20} color="var(--secondary-teal)" />
             <div>
               <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--primary-indigo)' }}>
-                Zero-Knowledge Encrypted Session
+                Private HR conversation
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Your identity remains hidden from case reviewers. Your reports and HR conversations stay available in this signed-in account.
+                HR can review the concern and reply without seeing your identity. Your conversations remain available when you sign in.
               </div>
             </div>
           </div>
@@ -239,10 +225,10 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
             <Lock size={24} color="var(--secondary-teal)" />
             <div>
               <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary-indigo)' }}>
-                Zero-Knowledge Encrypted Session
+                Private HR conversation
               </div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Your identity remains hidden from case reviewers. This signed-in account securely retains access to your reports and conversations.
+                HR can review your concern and reply without seeing your identity.
               </div>
             </div>
           </div>
@@ -250,7 +236,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
       )}
 
       {/* Main Wizard Form Container */}
-      <div className="card" style={{
+      <div className="card employee-report-card" style={{
         maxWidth: '800px',
         margin: '0 auto',
         boxShadow: embedded ? 'var(--shadow-sm)' : 'var(--shadow-lg)'
@@ -268,8 +254,8 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
         <form onSubmit={handleNextStep}>
           {step === 1 && (
             <div>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>Step 1: Select Allegation Category</h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Choose the category that best describes the incident.</p>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>What would you like to report?</h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Choose the option that comes closest. You can explain the details next.</p>
 
               {myReports.length > 0 && (
                 <div style={{ background: 'var(--neutral-bg)', border: '1px solid var(--border-light)', borderRadius: '10px', padding: '0.9rem', marginBottom: '1.5rem' }}>
@@ -323,8 +309,8 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
 
           {step === 2 && (
             <div>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>Step 2: Incident Narrative</h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Provide objective details regarding dates, times, and events.</p>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>Tell us what happened</h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Include dates, locations, and witnesses if you remember them.</p>
 
               <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                 <label className="form-label">Detailed Incident Narrative</label>
@@ -340,7 +326,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
               </div>
 
               <div style={{ background: 'var(--warning-amber-light)', padding: '0.85rem', borderRadius: '8px', borderLeft: '4px solid var(--warning-amber)', marginBottom: '2rem', fontSize: '0.8rem', color: 'var(--text-dark)' }}>
-                🔒 <strong>FairLens Privacy Guard:</strong> For complete anonymity, avoid including your own full name unless you explicitly wish to be contacted directly.
+                <strong>Privacy note:</strong> You do not need to include your name in the description.
               </div>
 
               <div style={{ display: 'flex', gap: '1rem' }}>
@@ -355,8 +341,8 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
 
           {step === 3 && (
             <div>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>Step 3: Attach Evidence (Optional)</h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Upload screenshots, email receipts, or documents. EXIF metadata is automatically stripped.</p>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>Add supporting files <small>(optional)</small></h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>You can attach screenshots, emails, PDFs, or documents.</p>
 
               <input
                 ref={fileInputRef}
@@ -415,7 +401,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <button type="button" onClick={() => setStep(2)} className="btn btn-outline" style={{ flex: 1 }}>Back</button>
                 <button type="submit" disabled={submitting} className="btn btn-coral" style={{ flex: 2, opacity: submitting ? 0.7 : 1 }}>
-                  <span>{submitting ? 'Submitting...' : 'Submit Anonymous Report Encrypted'}</span>
+                  <span>{submitting ? 'Submitting...' : 'Submit report privately'}</span>
                   <ShieldCheck size={16} />
                 </button>
               </div>
@@ -429,7 +415,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
               </div>
 
               <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--primary-indigo)', marginBottom: '0.5rem' }}>
-                Report Submitted Securely
+                Your report has been submitted
               </h2>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: '560px', margin: '0 auto 2rem auto' }}>
                 Your report has been encrypted and assigned to the HR case team. It is now saved to your account, so you can return to this conversation whenever you sign in.
@@ -442,7 +428,7 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
 
               <button type="button" onClick={() => setStep(5)} className="btn btn-teal">
                 <MessageSquare size={16} />
-                <span>Continue to Anonymous Chat with HR</span>
+                <span>Open conversation with HR</span>
               </button>
             </div>
           )}
@@ -487,8 +473,8 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Lock size={16} color="var(--secondary-teal)" />
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Anonymous Chat with HR</div>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>Two-way encrypted • Your identity is never revealed</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Private conversation with HR</div>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>Your identity is hidden from the case reviewer</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.4rem' }}>
@@ -551,13 +537,18 @@ export default function EmployeeReportingPortal({ embedded, onBackToDashboard })
           </div>
         )}
       </div>
+      <style>{reportStyles}</style>
     </div>
   );
 }
 
+const reportStyles = `
+.employee-report-portal.standalone{background:#f6f7f9!important;padding:34px 18px!important}.report-topbar{padding:14px 16px;border:1px solid #e1e5eb;border-radius:14px;background:#fff}.employee-report-portal .anonymity-shield-banner{border:1px solid #dbe5fb;border-radius:13px;background:#f5f8ff;background-image:none}.employee-report-portal .anonymity-shield-banner svg{color:#2563eb!important}.employee-report-portal .anonymity-shield-banner>div>div:first-child{color:#101828!important;font-size:12px!important}.employee-report-portal .anonymity-shield-banner>div>div:last-child{margin-top:3px;font-size:11px!important;line-height:1.5}.employee-report-portal.embedded>div:first-child{margin-bottom:12px!important}.employee-report-card{max-width:800px!important;padding:27px!important;border-color:#e1e5eb!important;border-radius:17px!important;box-shadow:0 5px 18px rgba(16,24,40,.035)!important}.employee-report-card>div:first-child{gap:8px}.employee-report-card .btn{min-height:42px;border-radius:9px;font-size:12px;font-weight:750}.employee-report-card .btn-teal,.employee-report-card .btn-coral{border-color:#17191d;background:#17191d;color:#fff}.employee-report-card .btn-teal:hover,.employee-report-card .btn-coral:hover{border-color:#2563eb;background:#2563eb}.employee-report-card .form-textarea,.employee-report-card .form-input{border-color:#d8dde5;border-radius:10px;background:#fff}.employee-report-card .form-textarea:focus,.employee-report-card .form-input:focus{border-color:#7da2f7;box-shadow:0 0 0 4px rgba(37,99,235,.08)}.employee-report-card h2,.employee-report-card h3{color:#101828!important}.employee-report-card>form+div>div:nth-child(2)>div:first-child{background:#17191d!important}.employee-report-card .badge-teal{background:#eef4ff;color:#1d4ed8}.report-step>div:first-child{background:#e4e7ec!important;color:#667085!important}.report-step.active>div:first-child{background:#17191d!important;color:#fff!important}.report-step.done>div:first-child{background:#2563eb!important;color:#fff!important}.report-category{border:1px solid #e1e5eb!important;border-radius:11px!important;background:#fff!important;transition:.2s}.report-category:hover{border-color:#aeb7c5!important;background:#fafbfc!important}.report-category.selected{border:1.5px solid #7da2f7!important;background:#f5f8ff!important}.report-category>div:first-child{border-color:#2563eb!important}.report-category.selected>div:first-child{background:#2563eb!important}.report-category>div:last-child>div:first-child{color:#101828!important}@media(max-width:620px){.employee-report-portal.standalone{padding:14px!important}.report-topbar{align-items:flex-start!important;gap:12px;flex-direction:column}.employee-report-card{padding:19px!important}.employee-report-card>div:first-child{overflow-x:auto}.employee-report-card>div:first-child>div{min-width:120px}.report-top-actions{width:100%}.report-top-actions button{flex:1}}@media(prefers-reduced-motion:reduce){.employee-report-portal *{animation:none!important;transition:none!important}}
+`;
+
 function StepHeader({ num, label, active, done }) {
   return (
-    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: active || done ? 1 : 0.4 }}>
+    <div className={`report-step ${active ? 'active' : ''} ${done ? 'done' : ''}`} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: active || done ? 1 : 0.4 }}>
       <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: done ? 'var(--secondary-teal)' : (active ? 'var(--primary-indigo)' : 'var(--border-light)'), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
         {done ? '✓' : num}
       </div>
@@ -569,6 +560,7 @@ function StepHeader({ num, label, active, done }) {
 function CategoryRadio({ label, desc, selected, onClick }) {
   return (
     <div
+      className={`report-category ${selected ? 'selected' : ''}`}
       onClick={onClick}
       style={{
         padding: '1rem',

@@ -1,21 +1,21 @@
 :root {
   /* Color Tokens */
-  --primary-indigo: #2B2E6B;
-  --primary-indigo-dark: #1E204B;
-  --primary-indigo-light: #3D418C;
-  --secondary-teal: #3FA796;
-  --secondary-teal-light: #EBF7F5;
-  --accent-coral: #E85D4E;
-  --accent-coral-light: #FDF2F0;
-  --warning-amber: #E6A100;
-  --warning-amber-light: #FFF8E6;
+  --primary-indigo: #172033;
+  --primary-indigo-dark: #0F172A;
+  --primary-indigo-light: #344054;
+  --secondary-teal: #2563EB;
+  --secondary-teal-light: #EEF4FF;
+  --accent-coral: #D92D20;
+  --accent-coral-light: #FEF3F2;
+  --warning-amber: #D97706;
+  --warning-amber-light: #FFFAEB;
   
-  --neutral-bg: #F7F5F2;
+  --neutral-bg: #F6F7F9;
   --surface-white: #FFFFFF;
-  --text-dark: #1E1F26;
-  --text-muted: #656B7C;
-  --border-light: #D8DCE3;
-  --border-subtle: #EBEFF5;
+  --text-dark: #101828;
+  --text-muted: #667085;
+  --border-light: #E1E5EB;
+  --border-subtle: #EEF0F3;
 
   /* Typography */
   --font-serif: 'Fraunces', Georgia, serif;
@@ -24,8 +24,8 @@
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(30, 31, 38, 0.05);
-  --shadow-md: 0 4px 12px rgba(30, 31, 38, 0.08);
-  --shadow-lg: 0 12px 32px rgba(30, 31, 38, 0.12);
+  --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.07);
+  --shadow-lg: 0 20px 48px rgba(16, 24, 40, 0.1);
 
   /* Border Radii */
   --radius-card: 12px;
@@ -682,3 +682,553 @@ h1, h2, h3, h4 {
   color: var(--primary-indigo);
 }
 
+/* HR workspace — shared visual system */
+.app-container {
+  background: #f6f7f9;
+}
+
+.app-container .sidebar {
+  position: sticky;
+  top: 0;
+  width: 238px;
+  height: 100vh;
+  background: #15171b;
+  border-right: 0;
+  box-shadow: none;
+}
+
+.app-container .sidebar-header {
+  min-height: 76px;
+  padding: 18px 20px;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-container .brand-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: none;
+  color: #15171b;
+  font-family: var(--font-sans);
+  font-size: 12px;
+}
+
+.app-container .brand-name {
+  font-family: var(--font-serif);
+  font-size: 19px;
+}
+
+.brand-context {
+  margin-top: 1px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 10px;
+}
+
+.app-container .sidebar-nav {
+  gap: 3px;
+  padding: 16px 12px;
+}
+
+.app-container .nav-section-label {
+  margin-top: 9px;
+  padding: 10px 10px 5px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.app-container .nav-item {
+  position: relative;
+  gap: 11px;
+  min-height: 42px;
+  padding: 10px 11px;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.app-container .nav-item svg {
+  width: 17px;
+  height: 17px;
+}
+
+.app-container .nav-item:hover {
+  background: rgba(255, 255, 255, 0.055);
+  color: #fff;
+}
+
+.app-container .nav-item.active {
+  background: #fff;
+  box-shadow: none;
+  color: #15171b;
+}
+
+.app-container .nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  width: 3px;
+  height: 20px;
+  border-radius: 0 4px 4px 0;
+  background: #4f7ff2;
+}
+
+.app-container .sidebar-footer {
+  padding: 16px 18px;
+  border-top-color: rgba(255, 255, 255, 0.08);
+  background: transparent;
+}
+
+.app-container .avatar-circle {
+  width: 34px;
+  height: 34px;
+  background: #2b2e34;
+  color: #fff;
+  font-size: 10px;
+}
+
+.app-container .user-name {
+  font-size: 11px;
+}
+
+.app-container .user-role {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 9px;
+}
+
+.app-container .top-navbar {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  height: 76px;
+  padding: 0 30px;
+  border-bottom-color: #e4e7ec;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+  backdrop-filter: blur(16px);
+}
+
+.navbar-page {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.navbar-page strong {
+  color: #101828;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.navbar-page span {
+  overflow: hidden;
+  margin-top: 2px;
+  color: #98a2b3;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-container .navbar-actions {
+  gap: 9px;
+}
+
+.navbar-user {
+  margin-right: 5px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.notification-wrap {
+  position: relative;
+}
+
+.navbar-icon-button,
+.navbar-logout {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e1e5eb;
+  border-radius: 9px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.navbar-icon-button {
+  width: 36px;
+}
+
+.navbar-icon-button > span {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+  background: #d92d20;
+}
+
+.navbar-logout {
+  gap: 7px;
+  padding: 0 11px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.navbar-icon-button:hover,
+.navbar-logout:hover {
+  border-color: #b8c0cc;
+  background: #f8fafc;
+  color: #101828;
+}
+
+.app-container .main-content {
+  max-width: 1440px;
+  padding: 28px 30px 55px;
+}
+
+.app-container .page-header {
+  margin-bottom: 22px;
+}
+
+.app-container .page-title {
+  color: #101828;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.app-container .page-subtitle {
+  color: #667085;
+  font-size: 13px;
+}
+
+.app-container .card,
+.main-content .work-queue,
+.main-content .decision-panel,
+.main-content .decision-card,
+.main-content .brief-footer > article,
+.main-content .comparison-card,
+.main-content .comparison-toolbar,
+.main-content .heatmap-panel,
+.main-content .department-drawer,
+.main-content .pay-card,
+.main-content .pay-kpi,
+.main-content .gender-promo-card,
+.main-content .gender-promo-kpi,
+.main-content .compliance-card,
+.main-content .category-scores,
+.main-content .issue-cards article {
+  border-color: #e2e6ec;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(16, 24, 40, 0.035);
+}
+
+.app-container .card:hover {
+  transform: none;
+  border-color: #d4dae3;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.07);
+}
+
+.main-content .work-hero,
+.main-content .comparison-hero,
+.main-content .equity-header,
+.main-content .pay-hero,
+.main-content .gender-promo-hero,
+.main-content .compliance-hero {
+  border: 1px solid #25282e;
+  border-radius: 18px;
+  background: #17191d;
+  box-shadow: 0 14px 35px rgba(16, 24, 40, 0.12);
+}
+
+.main-content .work-hero h1,
+.main-content .comparison-hero h1,
+.main-content .equity-header h1,
+.main-content .pay-hero h1,
+.main-content .gender-promo-hero h1,
+.main-content .compliance-hero h1,
+.main-content .quick-work h2,
+.main-content .insights-panel h2,
+.main-content .recommendations h2 {
+  color: #fff;
+}
+
+.main-content .work-hero > div:first-child > span,
+.main-content .comparison-eyebrow,
+.main-content .equity-header > div:first-child > span,
+.main-content .pay-hero > div:first-child > span,
+.main-content .gender-promo-hero > div:first-child > span,
+.main-content .compliance-hero > div:first-child > span {
+  color: #9db8f7;
+}
+
+.main-content .quick-work,
+.main-content .insights-panel,
+.main-content .recommendations {
+  border-radius: 16px;
+  background: #17191d !important;
+}
+
+.main-content .quick-work > span,
+.main-content .insights-heading span,
+.main-content .recommendations > div:first-child span,
+.main-content .insights-heading > i,
+.main-content .recommendations > div:first-child i {
+  color: #9db8f7;
+}
+
+.main-content .section-heading,
+.main-content .pay-card-title,
+.main-content .gender-promo-title,
+.main-content .compliance-title {
+  padding: 18px 20px;
+}
+
+.main-content .section-heading h2,
+.main-content .pay-card-title h2,
+.main-content .gender-promo-title h2,
+.main-content .compliance-title h2,
+.main-content .department-title strong,
+.main-content .comparison-card-head h2 {
+  color: #101828;
+}
+
+.app-container .data-table-container {
+  overflow: hidden;
+  border-color: #e1e5eb;
+  border-radius: 14px;
+}
+
+.app-container .data-table th,
+.main-content .disparity-head,
+.main-content .equity-head,
+.main-content .candidate-head,
+.main-content .employee-table-head {
+  background: #f8fafc;
+  color: #667085;
+}
+
+.app-container .data-table th {
+  padding: 12px 14px;
+  font-size: 10px;
+}
+
+.app-container .data-table td {
+  padding: 13px 14px;
+  font-size: 12px;
+}
+
+.app-container .data-table tr:hover td {
+  background: #f9fafb;
+}
+
+.app-container .btn {
+  min-height: 38px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.app-container .btn-primary,
+.app-container .btn-teal {
+  border-color: #17191d;
+  background: #17191d;
+}
+
+.app-container .btn-primary:hover,
+.app-container .btn-teal:hover {
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.app-container .badge {
+  font-size: 10px;
+}
+
+.app-container .badge-teal {
+  background: #eef4ff;
+  color: #1d4ed8;
+}
+
+.app-container .form-input,
+.app-container .form-select,
+.app-container .form-textarea {
+  border-color: #d8dde5;
+  border-radius: 9px;
+  background: #fff;
+  color: #101828;
+}
+
+.app-container .form-input:focus,
+.app-container .form-select:focus,
+.app-container .form-textarea:focus {
+  border-color: #7da2f7;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.main-content .today-strip,
+.main-content .pay-filters,
+.main-content .gender-promo-filters,
+.main-content .compliance-filters {
+  border-color: #e2e6ec;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.025);
+}
+
+.main-content .today-strip strong,
+.main-content .pay-kpi strong,
+.main-content .gender-promo-kpi strong,
+.main-content .category-scores strong,
+.main-content .issue-cards strong {
+  color: #101828;
+}
+
+.main-content .male,
+.main-content .male-bar,
+.main-content .load-list i.indigo {
+  background: #2563eb;
+}
+
+.main-content .female,
+.main-content .female-bar,
+.main-content .load-list i.teal {
+  background: #60a5fa;
+}
+
+.main-content .comparison-card > button {
+  background: #17191d;
+}
+
+.main-content .comparison-card > button:hover {
+  background: #2563eb;
+}
+
+.main-content .comparison-card.leader {
+  border-color: #9db8f7;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.09);
+}
+
+.main-content .comparison-card.leader::before {
+  background: #2563eb;
+}
+
+.main-content .pay-score,
+.main-content .gender-promo-score {
+  background:
+    radial-gradient(circle closest-side, #17191d 76%, transparent 78% 99%),
+    conic-gradient(#6f9af7 var(--score), rgba(255, 255, 255, 0.13) 0);
+}
+
+.main-content .compliance-actions button.primary {
+  border-color: #fff;
+  background: #fff;
+  color: #17191d;
+}
+
+.main-content .recommendation b {
+  background: #9db8f7;
+  color: #111827;
+}
+
+.main-content .work-copy h3 {
+  font-size: 13px;
+}
+
+.main-content .work-copy p,
+.main-content .decision-list strong,
+.main-content .case-list strong,
+.main-content .brief-timeline strong {
+  font-size: 11px;
+}
+
+.main-content .work-copy > div span,
+.main-content .work-copy > small,
+.main-content .decision-list span,
+.main-content .case-list span,
+.main-content .brief-timeline span,
+.main-content .brief-timeline time {
+  font-size: 9px;
+}
+
+.main-content .work-item > a,
+.main-content .section-heading > a,
+.main-content .section-heading > small {
+  font-size: 10px;
+}
+
+.main-content .today-strip span {
+  font-size: 10px;
+}
+
+.main-content .today-strip small {
+  font-size: 10px;
+}
+
+@media (max-width: 900px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .app-container .sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+
+  .app-container .sidebar-header,
+  .app-container .sidebar-footer,
+  .app-container .nav-section-label {
+    display: none;
+  }
+
+  .app-container .sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 9px;
+  }
+
+  .app-container .nav-item {
+    flex: 0 0 auto;
+    min-height: 38px;
+    white-space: nowrap;
+  }
+
+  .app-container .nav-item.active::before {
+    display: none;
+  }
+
+  .app-container .top-navbar {
+    height: 66px;
+    padding: 0 18px;
+  }
+
+  .app-container .main-content {
+    padding: 22px 18px 45px;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar-page span,
+  .navbar-user,
+  .navbar-logout span {
+    display: none;
+  }
+
+  .main-content .work-hero,
+  .main-content .comparison-hero,
+  .main-content .equity-header,
+  .main-content .pay-hero,
+  .main-content .gender-promo-hero,
+  .main-content .compliance-hero {
+    padding: 24px 20px;
+  }
+}
