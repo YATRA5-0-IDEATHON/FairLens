@@ -7,7 +7,8 @@ import {
   DollarSign, 
   TrendingUp, 
   ShieldAlert, 
-  FileSpreadsheet
+  FileSpreadsheet,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,7 +17,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <div className="brand-logo">FL</div>
+        <img src="/logo.png" alt="FairLens" className="brand-logo" />
         <div>
           <span className="brand-name">FairLens</span>
           <p className="brand-context">HR workspace</p>

@@ -126,16 +126,14 @@ h1, h2, h3, h4 {
 .brand-logo {
   width: 34px;
   height: 34px;
-  background: linear-gradient(135deg, var(--secondary-teal), var(--accent-coral));
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: #FFF;
+  object-fit: contain;
+  background: linear-gradient(135deg, var(--secondary-teal), var(--accent-coral));
   box-shadow: var(--shadow-sm);
+}
+
+.brand-logo-text {
+  display: none;
 }
 
 .brand-name {
@@ -707,11 +705,10 @@ h1, h2, h3, h4 {
   width: 38px;
   height: 38px;
   border-radius: 10px;
+  object-fit: contain;
   background: #fff;
+  padding: 4px;
   box-shadow: none;
-  color: #15171b;
-  font-family: var(--font-sans);
-  font-size: 12px;
 }
 
 .app-container .brand-name {

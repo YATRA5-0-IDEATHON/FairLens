@@ -1,34 +1,5 @@
 [
   {
-<<<<<<< HEAD
-=======
-    "name": "soham",
-    "gender": "Female",
-    "department": "Sales & Marketing",
-    "role": "Sales ",
-    "salary": 150000,
-    "level": "L4",
-    "experienceYears": 5,
-    "monthsInRole": 14,
-    "id": "EMP-724",
-    "status": "Active",
-    "performanceRating": 4.5
-  },
-  {
-    "name": "anjila Basnet",
-    "gender": "Female",
-    "department": "Engineering & Ops",
-    "role": "Senior Software Engineer",
-    "salary": 160000,
-    "level": "L4",
-    "experienceYears": 5,
-    "monthsInRole": 14,
-    "id": "EMP-834",
-    "status": "Active",
-    "performanceRating": 4.5
-  },
-  {
->>>>>>> f4a2726 (Complete Dynamic Pages)
     "id": "EMP-101",
     "name": "Elena Rostova",
     "gender": "Male",
