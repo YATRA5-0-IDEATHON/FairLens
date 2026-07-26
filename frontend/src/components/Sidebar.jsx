@@ -7,8 +7,7 @@ import {
   DollarSign, 
   TrendingUp, 
   ShieldAlert, 
-  FileSpreadsheet,
-  Settings as SettingsIcon
+  FileSpreadsheet
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 

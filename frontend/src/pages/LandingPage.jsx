@@ -72,7 +72,6 @@ export default function LandingPage() {
         <a className="landing-logo" href="#top"><img src="/logo.png" alt="FairLens" /><span>FairLens</span></a>
         <div className="nav-links">
           <a href="#features">What it does</a><a href="#solutions">How it works</a><a href="#about">Why FairLens</a>
-          <a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
         </div>
         <div className="nav-actions"><Link to="/login">Log in</Link><Link className="nav-cta" to="/login">Get started <ArrowRight size={14} /></Link></div>
       </nav>

@@ -10,6 +10,8 @@ const API_BASE = '/api';
 
 const DataContext = createContext();
 const employeeDatasetSignature = JSON.stringify(initialEmployees);
+const candidateDatasetSignature = JSON.stringify(initialCandidates);
+const safetyDatasetSignature = JSON.stringify(initialSafetyReports);
 const authorizedHeaders = () => {
   try {
     const token = JSON.parse(localStorage.getItem('fairlens_auth_session'))?.token;
@@ -50,7 +52,8 @@ export function DataProvider({ children }) {
 
   const [safetyReports, setSafetyReports] = useState(() => {
     const saved = localStorage.getItem('fairlens_safety_reports');
-    if (saved) {
+    const savedSignature = localStorage.getItem('fairlens_safety_reports_dataset_signature');
+    if (saved && savedSignature === safetyDatasetSignature) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
     return initialSafetyReports;
@@ -58,7 +61,8 @@ export function DataProvider({ children }) {
 
   const [candidates, setCandidates] = useState(() => {
     const saved = localStorage.getItem('fairlens_candidates');
-    if (saved) {
+    const savedSignature = localStorage.getItem('fairlens_candidates_dataset_signature');
+    if (saved && savedSignature === candidateDatasetSignature) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
     return initialCandidates;
@@ -78,10 +82,12 @@ export function DataProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem('fairlens_safety_reports', JSON.stringify(safetyReports));
+    localStorage.setItem('fairlens_safety_reports_dataset_signature', safetyDatasetSignature);
   }, [safetyReports]);
 
   useEffect(() => {
     localStorage.setItem('fairlens_candidates', JSON.stringify(candidates));
+    localStorage.setItem('fairlens_candidates_dataset_signature', candidateDatasetSignature);
   }, [candidates]);
 
   // Keep separate FairLens tabs in sync without requiring a reload.
@@ -383,7 +389,9 @@ export function DataProvider({ children }) {
     localStorage.removeItem('fairlens_employees_dataset_signature');
     localStorage.removeItem('fairlens_bias_alerts');
     localStorage.removeItem('fairlens_safety_reports');
+    localStorage.removeItem('fairlens_safety_reports_dataset_signature');
     localStorage.removeItem('fairlens_candidates');
+    localStorage.removeItem('fairlens_candidates_dataset_signature');
     setEmployees(initialEmployees);
     setBiasAlerts(initialBiasAlerts);
     setSafetyReports(initialSafetyReports);
