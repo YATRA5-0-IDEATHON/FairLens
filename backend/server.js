@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { anonymizeResume } from './src/utils/anonymizer.js';
 import { createSessionToken, requireAuth, requireRole } from './src/middleware/session.middleware.js';
+import lifecycleRoutes from './src/routes/lifecycle.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +25,9 @@ const BIAS_ALERTS_FILE = path.join(DATASET_DIR, 'bias_alerts.json');
 const SAFETY_REPORTS_FILE = path.join(DATASET_DIR, 'safety_reports.json');
 const RESUMES_FILE = path.join(DATASET_DIR, 'resumes.json');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+const LEAVE_REQUESTS_FILE = path.join(DATASET_DIR, 'leave_requests.json');
+const CANDIDATES_FILE = path.join(DATASET_DIR, 'candidates.json');
+const LIFECYCLE_FILE = path.join(DATASET_DIR, 'lifecycle.json');
 
 // Helper functions to read/write JSON files safely
 const readJSON = (filePath) => {
@@ -56,6 +60,12 @@ const publicUser = user => ({
   companyCode: user.companyCode || null,
 });
 
+// Backwards-compatible audit endpoint used by the existing people operations view.
+app.get('/api/audit-logs', requireAuth, requireRole('hr'), (req, res) => {
+  const limit = Math.min(250, Math.max(1, Number(req.query.limit) || 100));
+  res.json(readJSON(path.join(DATASET_DIR, 'audit_logs.json')).slice(0, limit));
+});
+
 app.post('/api/auth/login', (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const password = String(req.body.password || '');
@@ -81,6 +91,95 @@ const requireHR = [requireAuth, requireRole('hr')];
 app.get('/api/employees', (req, res) => {
   const employees = readJSON(EMPLOYEES_FILE);
   res.json(employees);
+});
+
+app.get('/api/candidates', ...requireHR, (req, res) => {
+  const stored = readJSON(CANDIDATES_FILE);
+  const lifecycle = readJSON(LIFECYCLE_FILE);
+  const submitted = (lifecycle.applications || []).map(application => ({
+    id: application.candidateCode,
+    lifecycleApplicationId: application.id,
+    name: application.stage === 'Hired' ? application.candidateName : 'Identity protected',
+    email: application.stage === 'Hired' ? application.candidateEmail : '',
+    appliedRole: application.jobTitle,
+    appliedDate: application.appliedAt?.slice(0, 10),
+    skills: application.skills || [],
+    meritScore: application.meritScore,
+    status: application.stage,
+  }));
+  const known = new Set(submitted.map(item => item.id));
+  const safeStored = stored.filter(item => !known.has(item.id)).map(candidate => /hired/i.test(candidate.status) ? candidate : {
+    ...candidate,
+    name: 'Identity protected',
+    email: '',
+    phone: '',
+    location: '',
+    education: candidate.education ? { ...candidate.education, school: undefined } : candidate.education,
+  });
+  res.json([...submitted, ...safeStored]);
+});
+
+app.patch('/api/candidates/:id/status', ...requireHR, (req, res) => {
+  const candidates = readJSON(CANDIDATES_FILE);
+  const candidate = candidates.find(item => item.id === req.params.id);
+  if (!candidate) return res.status(404).json({ error: 'Candidate not found' });
+  if (!['Pending Review', 'Shortlisted', 'Hired', 'Declined'].includes(req.body.status)) return res.status(400).json({ error: 'Invalid candidate status' });
+  candidate.status = req.body.status;
+  writeJSON(CANDIDATES_FILE, candidates);
+  res.json(candidate);
+});
+
+app.get('/api/leave-requests/mine', requireAuth, requireRole('employee'), (req, res) => {
+  const user = readJSON(USERS_FILE).find(item => item.id === req.auth.sub);
+  if (!user?.employeeId) return res.status(403).json({ error: 'Employee account is not linked' });
+  return res.json(readJSON(LEAVE_REQUESTS_FILE).filter(item => item.employeeId === user.employeeId));
+});
+
+app.get('/api/leave-requests', ...requireHR, (req, res) => {
+  res.json(readJSON(LEAVE_REQUESTS_FILE));
+});
+
+app.post('/api/leave-requests', requireAuth, requireRole('employee'), (req, res) => {
+  const user = readJSON(USERS_FILE).find(item => item.id === req.auth.sub);
+  const employee = readJSON(EMPLOYEES_FILE).find(item => item.id === user?.employeeId);
+  if (!employee) return res.status(403).json({ error: 'Employee account is not linked' });
+  const type = String(req.body.type || '').trim();
+  const startDate = String(req.body.startDate || '');
+  const endDate = String(req.body.endDate || '');
+  const reason = String(req.body.reason || '').trim();
+  if (!['Annual leave', 'Sick leave', 'Personal leave', 'Unpaid leave'].includes(type)) return res.status(400).json({ error: 'Select a valid leave type' });
+  if (!startDate || !endDate || new Date(endDate) < new Date(startDate)) return res.status(400).json({ error: 'Enter a valid date range' });
+  if (!reason || reason.length > 500) return res.status(400).json({ error: 'Reason is required and must be under 500 characters' });
+  const requests = readJSON(LEAVE_REQUESTS_FILE);
+  const overlap = requests.some(item => item.employeeId === employee.id && item.status !== 'Declined' && startDate <= item.endDate && endDate >= item.startDate);
+  if (overlap) return res.status(409).json({ error: 'This request overlaps an existing leave request' });
+  const days = Math.floor((new Date(`${endDate}T00:00:00Z`) - new Date(`${startDate}T00:00:00Z`)) / 86400000) + 1;
+  const request = {
+    id: `LEAVE-${Date.now().toString(36).toUpperCase()}`,
+    employeeId: employee.id,
+    employeeName: employee.name,
+    department: employee.department,
+    type, startDate, endDate, days, reason,
+    status: 'Pending',
+    submittedAt: new Date().toISOString(),
+    reviewedAt: null,
+    reviewer: null,
+  };
+  requests.unshift(request);
+  writeJSON(LEAVE_REQUESTS_FILE, requests);
+  return res.status(201).json(request);
+});
+
+app.patch('/api/leave-requests/:id', ...requireHR, (req, res) => {
+  const requests = readJSON(LEAVE_REQUESTS_FILE);
+  const request = requests.find(item => item.id === req.params.id);
+  if (!request) return res.status(404).json({ error: 'Leave request not found' });
+  if (!['Approved', 'Declined'].includes(req.body.status)) return res.status(400).json({ error: 'Status must be Approved or Declined' });
+  request.status = req.body.status;
+  request.reviewedAt = new Date().toISOString();
+  request.reviewer = req.auth.email;
+  writeJSON(LEAVE_REQUESTS_FILE, requests);
+  return res.json(request);
 });
 
 // POST New Employee (Writes directly to dataset/employees.json)
@@ -301,6 +400,8 @@ app.put('/api/resumes/:id/evaluate', ...requireHR, (req, res) => {
   writeJSON(RESUMES_FILE, resumes);
   res.json({ success: true, data: resumes[index] });
 });
+
+app.use('/api/lifecycle', lifecycleRoutes);
 
 app.listen(PORT, () => {
   console.log(`FairLens API Server running on http://localhost:${PORT}`);

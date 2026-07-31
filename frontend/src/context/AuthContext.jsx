@@ -68,12 +68,14 @@ export function AuthProvider({ children }) {
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     setAuth(session);
+    window.dispatchEvent(new CustomEvent('fairlens:auth-changed', { detail: session }));
     return session;
   };
 
   const logout = () => {
     localStorage.removeItem(SESSION_KEY);
     setAuth(emptyAuth);
+    window.dispatchEvent(new CustomEvent('fairlens:auth-changed', { detail: emptyAuth }));
   };
 
   return <AuthContext.Provider value={{ auth, login, logout }}>{children}</AuthContext.Provider>;

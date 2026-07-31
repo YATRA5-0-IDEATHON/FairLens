@@ -459,7 +459,11 @@ export default function BlindResumeScreening() {
               type="file"
               accept="application/pdf"
               style={{ display: 'none' }}
-              onChange={e => handleFile(e.target.files[0])}
+              onChange={async e => {
+                await handleFile(e.target.files[0]);
+                // Selecting the same resume twice must still trigger processing.
+                e.target.value = '';
+              }}
             />
             {uploadState === 'loading'
               ? <Loader2 size={15} color="var(--primary-indigo)" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />

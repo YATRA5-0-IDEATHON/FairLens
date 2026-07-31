@@ -1,0 +1,242 @@
+{
+  "jobs": [
+    {
+      "id": "JOB-1003",
+      "title": "Senior Full Stack Software Engineer",
+      "department": "Engineering & Ops",
+      "location": "Remote",
+      "employmentType": "Full-time",
+      "status": "Published",
+      "openings": 1,
+      "salaryMin": 125000,
+      "salaryMax": 165000,
+      "criteria": [
+        "JavaScript",
+        "React",
+        "Node.js"
+      ],
+      "owner": "Maya Chen",
+      "createdAt": "2026-07-29T08:00:00.000Z"
+    },
+    {
+      "id": "JOB-1001",
+      "title": "Senior Platform Engineer",
+      "department": "Engineering & Ops",
+      "location": "Remote",
+      "employmentType": "Full-time",
+      "status": "Published",
+      "openings": 2,
+      "salaryMin": 135000,
+      "salaryMax": 175000,
+      "criteria": [
+        "Distributed systems",
+        "Node.js",
+        "PostgreSQL"
+      ],
+      "owner": "Maya Chen",
+      "createdAt": "2026-07-20T08:00:00.000Z"
+    },
+    {
+      "id": "JOB-1002",
+      "title": "People Data Analyst",
+      "department": "People & Culture",
+      "location": "New York, NY",
+      "employmentType": "Full-time",
+      "status": "Draft",
+      "openings": 1,
+      "salaryMin": 90000,
+      "salaryMax": 120000,
+      "criteria": [
+        "SQL",
+        "Data Analysis",
+        "Fairness metrics"
+      ],
+      "owner": "Maya Chen",
+      "createdAt": "2026-07-28T10:30:00.000Z"
+    }
+  ],
+  "applications": [
+    {
+      "id": "APP-4D40B8F9",
+      "candidateCode": "CAND-B73445B4",
+      "candidateName": "ROHAN SHARMA",
+      "candidateEmail": "raaohan.sharma@email.com",
+      "jobId": "JOB-1003",
+      "jobTitle": "Senior Full Stack Software Engineer",
+      "stage": "Applied",
+      "meritScore": 91,
+      "skills": [
+        "Python",
+        "SQL",
+        "R",
+        "NumPy",
+        "Pandas",
+        "TensorFlow",
+        "AWS",
+        "Machine Learning",
+        "Data Science",
+        "Leadership",
+        "Collaboration"
+      ],
+      "appliedAt": "2026-07-31T07:49:59.591Z",
+      "lastDecisionReason": "Candidate submitted application."
+    },
+    {
+      "id": "APP-73A071F7",
+      "candidateCode": "CAND-F4D45935",
+      "candidateName": "SRISTI KARKI",
+      "candidateEmail": "sristi.kaaarki@email.com",
+      "jobId": "JOB-1003",
+      "jobTitle": "Senior Full Stack Software Engineer",
+      "stage": "Applied",
+      "meritScore": 97,
+      "skills": [
+        "Python",
+        "SQL",
+        "R",
+        "NumPy",
+        "Pandas",
+        "TensorFlow",
+        "PyTorch",
+        "scikit-learn",
+        "Hugging Face",
+        "PostgreSQL",
+        "MongoDB",
+        "Redis",
+        "Snowflake",
+        "AWS",
+        "Azure",
+        "GCP",
+        "Docker",
+        "Kubernetes",
+        "GitHub Actions",
+        "Jenkins",
+        "Kafka",
+        "Machine Learning",
+        "NLP",
+        "LLM",
+        "RAG",
+        "Leadership"
+      ],
+      "appliedAt": "2026-07-31T07:49:49.104Z",
+      "lastDecisionReason": "Candidate submitted application."
+    },
+    {
+      "id": "APP-6087016C",
+      "candidateCode": "CAND-67EAD724",
+      "candidateName": "SRISTI KARKI",
+      "candidateEmail": "sristi.karki@email.com",
+      "jobId": "JOB-1003",
+      "jobTitle": "Senior Full Stack Software Engineer",
+      "stage": "Applied",
+      "meritScore": 97,
+      "skills": [
+        "Python",
+        "SQL",
+        "R",
+        "NumPy",
+        "Pandas",
+        "TensorFlow",
+        "PyTorch",
+        "scikit-learn",
+        "Hugging Face",
+        "PostgreSQL",
+        "MongoDB",
+        "Redis",
+        "Snowflake",
+        "AWS",
+        "Azure",
+        "GCP",
+        "Docker",
+        "Kubernetes",
+        "GitHub Actions",
+        "Jenkins",
+        "Kafka",
+        "Machine Learning",
+        "NLP",
+        "LLM",
+        "RAG",
+        "Leadership"
+      ],
+      "appliedAt": "2026-07-31T06:19:02.734Z",
+      "lastDecisionReason": "Candidate submitted application."
+    },
+    {
+      "id": "APP-744019F7",
+      "candidateCode": "CAND-60DBB0FA",
+      "candidateName": "ROHAN SHARMA",
+      "candidateEmail": "rohan.sharma@email.com",
+      "jobId": "JOB-1003",
+      "jobTitle": "Senior Full Stack Software Engineer",
+      "stage": "Applied",
+      "meritScore": 91,
+      "skills": [
+        "Python",
+        "SQL",
+        "R",
+        "NumPy",
+        "Pandas",
+        "TensorFlow",
+        "AWS",
+        "Machine Learning",
+        "Data Science",
+        "Leadership",
+        "Collaboration"
+      ],
+      "appliedAt": "2026-07-31T06:13:14.949Z",
+      "lastDecisionReason": "Candidate submitted application."
+    },
+    {
+      "id": "APP-2001",
+      "candidateCode": "CAND-891",
+      "candidateName": "Sarah Jenkins",
+      "candidateEmail": "s.jenkins@domain.com",
+      "jobId": "JOB-1001",
+      "jobTitle": "Senior Platform Engineer",
+      "stage": "Screening",
+      "meritScore": 94,
+      "skills": [
+        "Distributed Systems",
+        "Node.js",
+        "React",
+        "PostgreSQL"
+      ],
+      "appliedAt": "2026-07-25T11:10:00.000Z",
+      "lastDecisionReason": "Application received and identity-blind review started."
+    },
+    {
+      "id": "APP-2002",
+      "candidateCode": "CAND-436",
+      "candidateName": "Identity protected",
+      "candidateEmail": "",
+      "jobId": "JOB-1001",
+      "jobTitle": "Senior Platform Engineer",
+      "stage": "Interview",
+      "meritScore": 89,
+      "skills": [
+        "Node.js",
+        "AWS",
+        "Docker"
+      ],
+      "appliedAt": "2026-07-24T09:00:00.000Z",
+      "lastDecisionReason": "Mandatory evidence verified in blind screening."
+    }
+  ],
+  "interviews": [
+    {
+      "id": "INT-3001",
+      "applicationId": "APP-2002",
+      "candidateCode": "CAND-436",
+      "jobTitle": "Senior Platform Engineer",
+      "scheduledAt": "2026-08-03T15:00:00.000Z",
+      "interviewer": "Alex Rivera",
+      "format": "Video",
+      "status": "Scheduled",
+      "rubric": "System design and evidence-based collaboration",
+      "rating": null,
+      "feedback": ""
+    }
+  ],
+  "offers": [],
+  "onboarding": []
+}

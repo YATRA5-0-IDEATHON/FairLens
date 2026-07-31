@@ -1,5 +1,175 @@
 [
   {
+    "id": "SAFE-467",
+    "passkey": "FL-PASSKEY-8L336IN4-DZJO70PQ",
+    "category": "Pay & Compensation Discrimination",
+    "severity": "Standard",
+    "date": "July 31, 2026",
+    "status": "Pending Review",
+    "narrative": "ufdyfb",
+    "ownerEmployeeId": "EMP-101",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "12:50 PM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello",
+        "time": "12:51 PM"
+      }
+    ]
+  },
+  {
+    "id": "SAFE-906",
+    "passkey": "FL-PASSKEY-GQZUU69E-6VJ1T1ES",
+    "category": "General Workplace Bullying / Microaggressions",
+    "severity": "Standard",
+    "date": "July 31, 2026",
+    "status": "Pending Review",
+    "narrative": "uityut",
+    "ownerEmployeeId": "EMP-101",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "12:47 PM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello",
+        "time": "12:47 PM"
+      }
+    ]
+  },
+  {
+    "id": "SAFE-696",
+    "passkey": "FL-PASSKEY-R9726GR2-RR84CW9K",
+    "category": "Pay & Compensation Discrimination",
+    "severity": "Standard",
+    "date": "July 31, 2026",
+    "status": "Pending Review",
+    "narrative": "gg",
+    "ownerEmployeeId": "EMP-101",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "12:33 PM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello",
+        "time": "12:33 PM"
+      }
+    ]
+  },
+  {
+    "id": "SAFE-815",
+    "passkey": "FL-PASSKEY-XH0YG9KS-NA60YN96",
+    "category": "Sexual Harassment / Unwelcome Conduct",
+    "severity": "Standard",
+    "date": "July 31, 2026",
+    "status": "Under Investigation",
+    "narrative": "hfdhfvb",
+    "ownerEmployeeId": "EMP-101",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "12:10 PM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello",
+        "time": "12:10 PM"
+      }
+    ]
+  },
+  {
+    "id": "SAFE-753",
+    "passkey": "FL-PASSKEY-YWQ8P3W9-FY0HP0TQ",
+    "category": "Pay & Compensation Discrimination",
+    "severity": "Standard",
+    "date": "July 31, 2026",
+    "status": "Pending Review",
+    "narrative": "my ppp",
+    "ownerEmployeeId": "EMP-101",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "12:01 PM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello help",
+        "time": "12:01 PM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello",
+        "time": "12:09 PM"
+      }
+    ]
+  },
+  {
+    "id": "SAFE-567",
+    "passkey": "FL-PASSKEY-MOMMJNCM-8EQ8RM3K",
+    "category": "Sexual Harassment / Unwelcome Conduct",
+    "severity": "Standard",
+    "date": "July 31, 2026",
+    "status": "Pending Review",
+    "narrative": "....",
+    "ownerEmployeeId": "EMP-101",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "11:34 AM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello",
+        "time": "11:34 AM"
+      }
+    ]
+  },
+  {
+    "id": "SAFE-683",
+    "passkey": "FL-PASSKEY-XBHNCAX2-U50GS3JY",
+    "category": "Pay & Compensation Discrimination",
+    "severity": "Standard",
+    "date": "July 26, 2026",
+    "status": "Pending Review",
+    "narrative": "There is a pay gap between me and my same level friends",
+    "evidenceFiles": [],
+    "chatHistory": [
+      {
+        "sender": "System",
+        "text": "Encrypted two-way channel opened between HR Case Officer and Anonymous Reporter.",
+        "time": "10:29 AM"
+      },
+      {
+        "sender": "Anonymous Employee",
+        "text": "hello sir , there is a pay gap",
+        "time": "10:29 AM"
+      },
+      {
+        "sender": "HR Officer",
+        "text": "can you elaborate more?",
+        "time": "10:29 AM"
+      }
+    ]
+  },
+  {
     "id": "SAFE-870",
     "passkey": "FL-PASSKEY-3IPB535P-NFSPLQUK",
     "category": "Pay & Compensation Discrimination",

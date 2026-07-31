@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 // Import initial JSON datasets (single canonical dataset via symlink)
 import initialEmployees from '../dataset/employees.json';
@@ -12,6 +12,14 @@ const DataContext = createContext();
 const employeeDatasetSignature = JSON.stringify(initialEmployees);
 const candidateDatasetSignature = JSON.stringify(initialCandidates);
 const safetyDatasetSignature = JSON.stringify(initialSafetyReports);
+const protectCandidateIdentity = candidate => /hired/i.test(candidate.status || '') ? candidate : {
+  ...candidate,
+  name: 'Identity protected',
+  email: '',
+  phone: '',
+  location: '',
+  education: candidate.education ? { ...candidate.education, school: undefined } : candidate.education,
+};
 const authorizedHeaders = () => {
   try {
     const token = JSON.parse(localStorage.getItem('fairlens_auth_session'))?.token;
@@ -65,7 +73,7 @@ export function DataProvider({ children }) {
     if (saved && savedSignature === candidateDatasetSignature) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
-    return initialCandidates;
+    return initialCandidates.map(protectCandidateIdentity);
   });
 
   const [selectedDeptFilter, setSelectedDeptFilter] = useState('All');
@@ -109,48 +117,71 @@ export function DataProvider({ children }) {
     return () => window.removeEventListener('storage', syncFromStorage);
   }, []);
 
-  // Fetch live dataset from backend API on mount
+  // The API is authoritative. Refresh operational data so separate users and
+  // devices see the same state without depending on browser storage.
   useEffect(() => {
-    const loadEmployees = async () => {
-      try {
-        const data = await fetchJSON(`${API_BASE}/employees`);
-        if (Array.isArray(data) && data.length > 0) {
-          setEmployees(data);
-        }
-      } catch {
-        // The imported dataset remains the source when the optional API is offline.
-      }
-    };
-
-    loadEmployees();
-  }, []);
-
-  // Poll the optional API so HR and employee sessions on different devices
-  // receive new case messages and status changes without refreshing.
-  useEffect(() => {
-    let active = true;
-    const loadSafetyReports = async () => {
+    const refreshOperationalData = async () => {
       try {
         const session = JSON.parse(localStorage.getItem('fairlens_auth_session') || '{}');
-        const endpoint = session.role === 'employee' ? '/safety-reports/mine' : '/safety-reports';
-        const data = await fetchJSON(`${API_BASE}${endpoint}`, { headers: authorizedHeaders() });
-        if (!active || !Array.isArray(data)) return;
-        setSafetyReports(previous => {
-          const localOnly = previous.filter(local => !data.some(remote => remote.id === local.id));
-          const next = [...data, ...localOnly];
-          return JSON.stringify(next) === JSON.stringify(previous) ? previous : next;
-        });
+        const [employeeData, candidateData, alertData] = await Promise.all([
+          fetchJSON(`${API_BASE}/employees`),
+          session.role === 'hr'
+            ? fetchJSON(`${API_BASE}/candidates`, { headers: authorizedHeaders() })
+            : Promise.resolve(null),
+          session.role === 'hr'
+            ? fetchJSON(`${API_BASE}/bias-alerts`, { headers: authorizedHeaders() })
+            : Promise.resolve(null),
+        ]);
+        if (Array.isArray(employeeData)) setEmployees(employeeData);
+        if (Array.isArray(candidateData)) setCandidates(candidateData.map(protectCandidateIdentity));
+        if (Array.isArray(alertData)) setBiasAlerts(alertData);
       } catch {
-        // Local shared state remains active while the optional API is offline.
+        // Keep the last confirmed state visible during a temporary outage.
       }
     };
-    loadSafetyReports();
-    const interval = window.setInterval(loadSafetyReports, 4000);
+    const timer = window.setTimeout(refreshOperationalData, 0);
+    const interval = window.setInterval(refreshOperationalData, 4000);
+    const handleAuth = () => refreshOperationalData();
+    window.addEventListener('fairlens:auth-changed', handleAuth);
     return () => {
-      active = false;
+      window.clearTimeout(timer);
       window.clearInterval(interval);
+      window.removeEventListener('fairlens:auth-changed', handleAuth);
     };
   }, []);
+
+  const refreshSafetyReports = useCallback(async () => {
+    try {
+      const session = JSON.parse(localStorage.getItem('fairlens_auth_session') || '{}');
+      if (!session.token || !session.role) return [];
+      const endpoint = session.role === 'employee' ? '/safety-reports/mine' : '/safety-reports';
+      const data = await fetchJSON(`${API_BASE}${endpoint}`, { headers: authorizedHeaders() });
+      if (!Array.isArray(data)) return [];
+      setSafetyReports(previous => {
+        const localOnly = previous.filter(local => !data.some(remote => remote.id === local.id)
+          && (session.role !== 'employee' || local.ownerEmployeeId === session.employeeId));
+        const next = [...data, ...localOnly];
+        return JSON.stringify(next) === JSON.stringify(previous) ? previous : next;
+      });
+      return data;
+    } catch {
+      return [];
+    }
+  }, []);
+
+  // Refresh immediately when the signed-in role changes, and then poll so HR
+  // and employees on different devices receive new messages.
+  useEffect(() => {
+    const initialTimer = window.setTimeout(refreshSafetyReports, 0);
+    const handleAuthChange = () => refreshSafetyReports();
+    window.addEventListener('fairlens:auth-changed', handleAuthChange);
+    const interval = window.setInterval(refreshSafetyReports, 4000);
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.removeEventListener('fairlens:auth-changed', handleAuthChange);
+      window.clearInterval(interval);
+    };
+  }, [refreshSafetyReports]);
 
   // Filtered employees by department
   const filteredEmployees = useMemo(() => {
@@ -269,8 +300,8 @@ export function DataProvider({ children }) {
     } catch (err) { console.log(err); }
   };
 
-  // Candidate applications are shared across pages through context and
-  // persisted locally. They do not depend on an optional backend endpoint.
+  // Candidate applications are retained locally for offline continuity and
+  // also enter the canonical lifecycle workflow when the API is available.
   const addCandidate = async (newCand) => {
     const idNum = Math.floor(100 + Math.random() * 900);
     const formatted = {
@@ -305,14 +336,42 @@ export function DataProvider({ children }) {
       status: 'Pending Review',
     };
 
-    setCandidates(prev => [formatted, ...prev]);
-
-    return formatted;
+    try {
+      const response = await fetch(`${API_BASE}/lifecycle/applications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formatted.name,
+          email: formatted.email,
+          jobTitle: formatted.appliedRole,
+          skills: formatted.skills,
+          meritScore: formatted.meritScore,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.ok) {
+        const connected = protectCandidateIdentity({ ...formatted, id: result.candidateCode || formatted.id, lifecycleApplicationId: result.id });
+        setCandidates(prev => [connected, ...prev.filter(candidate => candidate.id !== connected.id)]);
+        return connected;
+      }
+      throw new Error(result.error || `The application service returned ${response.status}`);
+    } catch (error) {
+      throw new Error(error.message || 'The application service is unavailable', { cause: error });
+    }
   };
 
   // Update a candidate's screening status (Shortlisted / Declined / Pending Review)
-  const updateCandidateStatus = (candId, status) => {
+  const updateCandidateStatus = async (candId, status) => {
     setCandidates(prev => prev.map(c => (c.id === candId ? { ...c, status } : c)));
+    try {
+      await fetch(`${API_BASE}/candidates/${candId}/status`, {
+        method: 'PATCH',
+        headers: authorizedHeaders(),
+        body: JSON.stringify({ status }),
+      });
+    } catch {
+      // The next real-time refresh restores the confirmed server state.
+    }
   };
 
   const addSafetyReport = async (report) => {
@@ -373,11 +432,17 @@ export function DataProvider({ children }) {
       ? { ...item, chatHistory: [...(item.chatHistory || []), message] }
       : item));
     try {
-      await fetch(`${API_BASE}/safety-reports/${reportId}/chat`, {
+      const response = await fetch(`${API_BASE}/safety-reports/${reportId}/chat`, {
         method: 'POST',
         headers: authorizedHeaders(),
         body: JSON.stringify({ sender, text }),
       });
+      if (response.ok) {
+        const result = await response.json();
+        if (result?.data) {
+          setSafetyReports(prev => prev.map(item => item.id === reportId ? result.data : item));
+        }
+      }
     } catch {
       // The message is already available to every page through shared state.
     }
@@ -395,7 +460,7 @@ export function DataProvider({ children }) {
     setEmployees(initialEmployees);
     setBiasAlerts(initialBiasAlerts);
     setSafetyReports(initialSafetyReports);
-    setCandidates(initialCandidates);
+    setCandidates(initialCandidates.map(protectCandidateIdentity));
   };
 
   return (
@@ -417,6 +482,7 @@ export function DataProvider({ children }) {
       addSafetyReport,
       updateSafetyReportStatus,
       addSafetyMessage,
+      refreshSafetyReports,
       dismissBiasAlert,
       resetToJSONFile
     }}>

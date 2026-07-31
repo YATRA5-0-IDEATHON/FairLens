@@ -14,7 +14,7 @@
     "email": "employee@fairlens.demo",
     "password": "Employee@2026",
     "role": "employee",
-    "employeeId": "EMP-001",
+    "employeeId": "EMP-101",
     "companyName": "FairLens Technologies",
     "companyCode": "FL-2026"
   },
@@ -24,7 +24,7 @@
     "email": "employee@fairlens.lemo",
     "password": "Employee@2023",
     "role": "employee",
-    "employeeId": "EMP-002",
+    "employeeId": "EMP-102",
     "companyName": "FairLens Technologies",
     "companyCode": "FL-2026"
   }

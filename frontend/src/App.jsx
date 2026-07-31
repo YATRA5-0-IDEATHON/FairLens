@@ -22,6 +22,8 @@ import HarassmentReportingDashboard from './pages/HarassmentReportingDashboard';
 import EmployeeReportingPortal from './pages/EmployeeReportingPortal';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import ComplianceReports from './pages/ComplianceReports';
+import TalentLifecycle from './pages/TalentLifecycle';
+import EnterpriseWorkspace from './pages/EnterpriseWorkspace';
 
 function LayoutWrapper({ children }) {
   return (
@@ -76,6 +78,8 @@ export default function App() {
           <Route path="/dashboard" element={<LayoutWrapper><HRDashboard /></LayoutWrapper>} />
           <Route path="/blind-screening" element={<LayoutWrapper><BlindResumeScreening /></LayoutWrapper>} />
           <Route path="/candidate-comparison" element={<LayoutWrapper><CandidateComparison /></LayoutWrapper>} />
+          <Route path="/talent-lifecycle" element={<LayoutWrapper><TalentLifecycle /></LayoutWrapper>} />
+          <Route path="/workspace/:module" element={<LayoutWrapper><EnterpriseWorkspace /></LayoutWrapper>} />
           <Route path="/gender-analytics" element={<LayoutWrapper><GenderAnalyticsDashboard /></LayoutWrapper>} />
           <Route path="/pay-equity" element={<LayoutWrapper><PayEquityAudit /></LayoutWrapper>} />
           <Route path="/promotion-analytics" element={<LayoutWrapper><PromotionAnalytics /></LayoutWrapper>} />
